@@ -350,8 +350,8 @@ The textual representation of the values is based on the serialization method fo
 | fc |  | Reserved |
 | f818 |  | Invalid simple value |
 | 5b0010000000000000 |  | Extremely large bstr length indicator: 4503599627370496 |
-| 18446744073709551616 |	c249010000000000000000 | Smallest positive bigint |
-| -18446744073709551617	| c349010000000000000000 | Smallest negative bigint |
+| 18446744073709551616 | c249010000000000000000 | Smallest positive bigint |
+| -18446744073709551617 | c349010000000000000000 | Smallest negative bigint |
 
 # Configuration and ALDRs
 
