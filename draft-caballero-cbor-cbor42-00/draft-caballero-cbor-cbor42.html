@@ -1,0 +1,2426 @@
+<!DOCTYPE html>
+<html lang="en" class="Internet-Draft">
+<head>
+<meta charset="utf-8">
+<meta content="Common,Latin" name="scripts">
+<meta content="initial-scale=1.0" name="viewport">
+<title>The tag-42 profile of CBOR</title>
+<meta content="Juan Caballero" name="author">
+<meta content="Robin Berjon" name="author">
+<meta content='
+       This document defines a very narrow profile of CBOR intended for use with the special tag 42.
+Like the earlier internet-draft submitted under the name "CBOR Core," much of its design dates to the first CBOR RFC and predates much of the layered approach to determinism and profiling in later years. 
+       Also like "CBOR/c", CBOR-42 can be used as an internet-scale serialization for JSON, and is optimized for objects that compose into a directed acyclical graph.
+Since CBOR-42 objects link to one another by hash-based identifiers tagged "42", deterministic encoding is mandated to verify dereferenced links and encode new ones. 
+    ' name="description">
+<meta content="xml2rfc 3.31.0" name="generator">
+<meta content="CBOR" name="keyword">
+<meta content="deterministic encoding" name="keyword">
+<meta content="sparkling distributed ledger" name="keyword">
+<meta content="draft-caballero-cbor-cbor42-latest" name="ietf.draft">
+<!-- Generator version information:
+  xml2rfc 3.31.0
+    Python 3.12.12
+    ConfigArgParse 1.7
+    google-i18n-address 3.1.1
+    intervaltree 3.1.0
+    Jinja2 3.1.6
+    lxml 5.3.1
+    platformdirs 4.5.0
+    pycountry 24.6.1
+    PyYAML 6.0.2
+    requests 2.32.5
+    wcwidth 0.2.14
+-->
+<link href="draft-caballero-cbor-cbor42.xml" rel="alternate" type="application/rfc+xml">
+<link href="#copyright" rel="license">
+<style type="text/css">@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Italic'), local('Lora-Italic'), url('https://martinthomson.github.io/rfc-css/fonts/lora-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Lora Regular'), local('Lora-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/lora-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C88, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-cyrillic.woff2') format('woff2');
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-vietnamese.woff2') format('woff2');
+  unicode-range: U+0102-0103, U+0110-0111, U+1EA0-1EF9, U+20AB;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Lora Bold'), local('Lora-Bold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-bold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Lora';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: local('Lora SemiBold'), local('Lora-SemiBold'), url('https://martinthomson.github.io/rfc-css/fonts/lora-semibold-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-024F, U+0259, U+1E00-1EFF, U+2020, U+20A0-20AB, U+20AD-20CF, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Oxygen Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: local('Oxygen Mono'), local('OxygenMono-Regular'), url('https://martinthomson.github.io/rfc-css/fonts/oxygenmono-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: italic;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-italic-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic-ext.woff2') format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-cyrillic.woff2') format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-greek.woff2') format('woff2');
+  unicode-range: U+0370-0377, U+037A-037F, U+0384-038A, U+038C, U+038E-03A1, U+03A3-03FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin-ext.woff2') format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+@font-face {
+  font-family: 'Sofia Sans Semi Condensed';
+  font-style: normal;
+  font-weight: 1 1000;
+  src: url('https://martinthomson.github.io/rfc-css/fonts/sofiasanssemicondensed-regular-latin.woff2') format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+:root {
+  color-scheme: light dark;
+  --background-color: #fff;
+  --text-color: #222;
+  --title-color: #191919;
+  --link-color: #2a6496;
+  --highlight-color: #f9f9f9;
+  --line-color: #eee;
+  --pilcrow-weak: #ddd;
+  --pilcrow-strong: #bbb;
+  --small-font-size: 14.5px;
+  --font-mono: 'Oxygen Mono', monospace;
+  --font-title: "Sofia Sans Semi Condensed", sans-serif;
+  scrollbar-color: #bbb #eee;
+}
+body {
+  max-width: 600px;
+  margin: 75px auto;
+  padding: 0 5px;
+  color: var(--text-color);
+  background-color: var(--background-color);
+  font: 16px/22px "Lora", serif;
+  scroll-behavior: smooth;
+}
+
+.ears {
+  display: none;
+}
+
+/* headings */
+section {
+  clear: both;
+}
+.section-number {
+  padding-right: 0.5em;
+}
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-title);
+  font-weight: 680;
+  margin: 0.8em 0 0.3em;
+  font-size-adjust: 0.5;
+  color: var(--title-color);
+}
+h1#title {
+  font-size: 32px;
+  line-height: 40px;
+  clear: both;
+}
+h1#title, h1#rfcnum {
+  margin: 1.5em 0 0.2em;
+}
+h1#rfcnum + h1#title {
+  margin: 0.2em 0;
+}
+
+h1, h2, h3 {
+  font-size: 22px;
+  line-height: 27px;
+}
+h4, h5, h6 {
+  font-size: 20px;
+  line-height: 24px;
+}
+
+/* general structure */
+.author {
+  padding-bottom: 0.3em;
+  vertical-align: top;
+}
+#abstract+p {
+  font-size: 18px;
+  line-height: 24px;
+}
+#abstract+p code, #abstract+p samp, #abstract+p tt {
+  font-size: 16px;
+  line-height: 0;
+}
+
+p {
+  padding: 0;
+  margin: 0.5em 0;
+  text-align: left;
+}
+div {
+  margin: 0;
+}
+.alignRight.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignRight.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignRight {
+  margin: 1em 0;
+}
+.alignRight > *:first-child {
+  border: none;
+  margin: 0;
+  float: right;
+  clear: both;
+}
+.alignRight > *:nth-child(2) {
+  clear: both;
+  display: block;
+  border: none;
+}
+svg {
+  display: block;
+}
+/* font-family isn't space-separated, but =~ will have to do */
+svg[font-family~="monospace" i], svg [font-family~="monospace" i] {
+  font-family: var(--font-mono);
+}
+.alignCenter.art-text {
+  background-color: var(--highlight-color);
+  border: 1px solid var(--line-color);
+  border-radius: 3px;
+  padding: 0.5em 1em 0;
+  margin-bottom: 0.5em;
+}
+.alignCenter.art-text pre {
+  padding: 0;
+  width: auto;
+}
+.alignCenter {
+  margin: 1em 0;
+}
+.alignCenter > *:first-child {
+  border: none;
+  /* this isn't optimal, but it's an existence proof.  PrinceXML doesn't
+     support flexbox yet.
+  */
+  display: table;
+  margin: 0 auto;
+}
+
+/* lists */
+ol, ul {
+  padding: 0;
+  margin: 0 0 0.5em 2em;
+  & :is(ol, ul) {
+    margin-left: 1em;
+  }
+}
+li {
+  margin: 0 0 0.25em 0;
+}
+ul.empty, .ulEmpty {
+  list-style-type: none;
+  & li {
+    margin-top: 0.5em;
+  }
+}
+:is(ul, ol).compact, .ulCompact, .olCompact {
+  margin: 0 0 0 2em;
+  & li {
+    margin: 0;
+    & :first-child { margin-top: 0; }
+    & :last-child { margin-bottom: 0; }
+  }
+}
+
+/* definition lists */
+dl {
+  clear: left;
+  --indent: 3ch;
+  /* --indent: attr(indent ch); not supported in any browser, but we can dream */
+  &.olPercent {
+    --indent: 5ch;
+    & > dt {
+      min-width: calc(var(--indent) - 2ch);
+    }
+  }
+  &.olPercent > dt {
+    float: none;
+  }
+
+  dl > dd > & {
+    margin-top: 0.5em;
+    margin-bottom: 0;
+  }
+}
+dl:not(.dlNewline) > dt {
+  float: left;
+  margin-right: 2ch;
+  min-width: 8ch;
+}
+dl > dd {
+  margin-bottom: .8em;
+  margin-left: var(--indent) !important; /* stupid element overrides */
+  min-height: 2ex;
+}
+:is(dl.compact, .dlCompact) > dd {
+  margin-bottom: 0;
+  & > :is(:first-child, .break:first-child + *) {
+    margin-top: 0;
+  }
+  & > :is(:last-child) {
+    margin-bottom: 0;
+  }
+}
+:is(dd, span).break {
+  display: none;
+}
+
+/* links */
+a, a[href].selfRef:hover {
+  text-decoration: none;
+}
+a[href] {
+  color: var(--link-color);
+}
+a[href].selfRef, .iref + a[href].internal {
+  color: var(--text-color);
+}
+a[href]:hover {
+  text-decoration: underline;
+}
+a[href].selfRef:hover {
+  background-color: var(--highlight-color);
+}
+a.xref:is(.cite, .auto), :is(#status-of-memo, #copyright) a {
+  white-space: nowrap;
+}
+
+/* Figures */
+tt, code, pre {
+  background-color: var(--highlight-color);
+  font: 14px/22px var(--font-mono);
+}
+tt, code {
+  /* changing the font for inline elements leads to different ascender
+     and descender heights; as we want to retain baseline alignment,
+     remove leading to avoid altering the final height of lines
+     note: this fails if these blocks take an entire line,
+     a different solution would be great */
+  line-height: 0;
+}
+:is(h1, h2, h3, h4, h5, h6) :is(tt, code) {
+  font-size: 84%;
+}
+pre {
+  border: 1px solid var(--line-color);
+  font-size: 13.5px;
+  line-height: 16px;
+  letter-spacing: -0.2px;
+  margin: 5px;
+  padding: 5px;
+}
+img {
+  max-width: 100%;
+}
+figure {
+  margin: 0.5em 0;
+  padding: 0;
+}
+figure blockquote {
+  margin: 0.8em 0.4em 0.4em;
+}
+figcaption, caption {
+  font-style: italic;
+  margin: 0.5em 1.5em;
+  text-align: left;
+  caption-side: bottom;
+}
+@media screen {
+  /* Auto-collapse boilerplate. */
+  :is(#status-of-memo, #copyright) p {
+    margin: -2px 0;
+    max-height: 0;
+    transition: max-height 2s ease, margin 0.5s ease 0.5s;
+    overflow: hidden;
+  }
+  :is(#status-of-memo, #copyright):hover p,
+  :is(#status-of-memo, #copyright) h2:target ~ p {
+    margin: 0.5em 0;
+    max-height: 500px;
+    overflow: auto;
+  }
+  pre, svg {
+    display: inline-block;
+    /* In the horizontal direction, sometimes people make over-sized figures.
+       Scrollbars for those is therefore necessary: auto adds them as necessary..
+       In the vertical direction, the line-height can combine with the font
+       asender/descender height to produce scrollbars: hidden avoids that. */
+    overflow: auto hidden;
+  }
+  pre {
+    max-width: 100%;
+    width: calc(100% - 22px - 1em);
+  }
+  svg {
+    max-width: calc(100% - 22px - 1em);
+  }
+  figure pre {
+    display: block;
+    width: calc(100% - 25px);
+  }
+  :is(pre, svg) + .pilcrow {
+    display: inline-block;
+    vertical-align: text-bottom;
+    padding-bottom: 8px;
+  }
+}
+
+/* aside, blockquote */
+aside, blockquote {
+  margin-left: 0;
+  padding: 0 2em;
+  font-style: italic;
+}
+blockquote {
+  margin: 1em 0;
+}
+cite {
+  display: block;
+  text-align: right;
+  font-style: italic;
+}
+
+/* tables */
+table {
+  width: auto;
+  max-width: 100%;
+  margin: 0 0 1em;
+  border-collapse: collapse;
+}
+table.right {
+  margin-left: auto;
+}
+table.center {
+  margin-left: auto;
+  margin-right: auto;
+}
+table.left {
+  margin-right: auto;
+}
+table .text-left {
+  text-align: left;
+}
+table .text-center {
+  text-align: center;
+}
+table .text-right {
+  text-align: right;
+}
+
+thead, tbody {
+  border: 1px solid var(--line-color);
+}
+th, td {
+  text-align: left;
+  vertical-align: top;
+  padding: 5px 10px;
+}
+th {
+  background-color: var(--line-color);
+}
+:is(tr:nth-child(2n), thead+tbody > tr:nth-child(2n+1)) > td {
+  background-color: var(--background-color);
+}
+:is(tr:nth-child(2n+1), thead+tbody > tr:nth-child(2n)) > td {
+  background-color: var(--highlight-color);
+}
+table caption {
+  margin: 0;
+  padding: 3px 0 3px 1em;
+}
+table p {
+  margin: 0;
+}
+
+/* pilcrow */
+a.pilcrow {
+  margin-left: 3px;
+  opacity: 0.2;
+  user-select: none;
+  &[href] {
+    color: var(--pilcrow-weak);
+    &:hover { text-decoration: none; }
+  }
+}
+@media not print {
+  :hover > a.pilcrow {
+    opacity: 1;
+  }
+  a.pilcrow[href]:hover {
+    color: var(--pilcrow-strong);
+    background-color: transparent;
+  }
+}
+@media print {
+  a.pilcrow {
+    display: none;
+  }
+}
+
+/* misc */
+hr {
+  border: 0;
+  border-top: 1px solid var(--line-color);
+}
+.bcp14 {
+  font-variant: small-caps;
+  font-weight: 600;
+  font-size: var(--small-font-size);
+}
+.role {
+  font-variant: all-small-caps;
+}
+sub, sup {
+  line-height: 1;
+  font-size: 80%;
+}
+
+/* info block */
+#identifiers {
+  margin: 0;
+  font-size: var(--small-font-size);
+  line-height: 18px;
+  --identifier-width: 15ch;
+  & dt {
+    width: var(--identifier-width);
+    min-width: var(--identifier-width);
+    clear: left;
+    float: left;
+    text-align: right;
+    margin-right: 1ch;
+  }
+  & dd {
+    margin: 0;
+    margin-left: calc(1em + var(--identifier-width)) !important;
+    min-width: 5em;
+  }
+  & .authors {
+    & .author {
+      display: inline-block;
+      margin-right: 1.5em;
+    }
+    & .org {
+      font-style: italic;
+    }
+  }
+}
+
+/* The prepared/rendered info at the very bottom of the page */
+.docInfo {
+  color: #999;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 2em;
+}
+.docInfo .prepared {
+  float: right;
+}
+
+/* table of contents */
+#toc {
+  padding: 0.75em 0 2em 0;
+  margin-bottom: 1em;
+
+  & nav {
+    & ul {
+      margin: 0 0.5em 0 0;
+      padding: 0;
+      list-style: none;
+    }
+    & li {
+      line-height: 1.3em;
+      margin: 2px 0;
+      padding-left: 1.2em;
+      text-indent: -1.2em;
+    }
+  }
+  & a.xref {
+    white-space: normal;
+  }
+}
+
+.references {
+  & > dt {
+    text-align: right;
+    font-weight: bold;
+    min-width: 10ch;
+    margin-right: 1.5ch;
+    &:target::before {
+      content: "⇒";
+      margin: 0 10px 0 -25px;
+    }
+  }
+  & > dd {
+    margin-left: 12ch !important;
+    overflow: visible;
+    & .refInstance {
+      margin-bottom: 0.8em;
+    }
+    & .ascii {
+      margin-bottom: 0.25em;
+    }
+  }
+}
+
+#rfc\.index\.index + ul {
+  margin-left: 0;
+}
+
+/* authors */
+address.vcard {
+  font-style: normal;
+  max-width: 20em;
+  margin: 1em auto 1em 0;
+
+  & .nameRole {
+    font-weight: 700;
+    margin-left: 0;
+  }
+  & .label {
+    margin: 0.5em 0;
+  }
+  & .type {
+    display: none;
+  }
+  & .alternative-contact {
+    margin: 0.5em 0 0.25em 0;
+  }
+  & .non-ascii {
+    margin: 0 0 0 2em;
+  }
+  & div.left {
+    text-align: left;
+  }
+  & div.right {
+    text-align: right;
+  }
+}
+
+hr.addr {
+  border-top: 1px dashed;
+  margin: 0;
+  color: #ddd;
+  max-width: calc(100% - 16px);
+}
+@media (min-width: 500px) {
+  #authors-addresses > section {
+    column-count: 2;
+    column-gap: 20px;
+  }
+  #authors-addresses > section > h2 {
+    column-span: all;
+  }
+  /* hack for break-inside: avoid-column */
+  #authors-addresses address {
+    display: inline-block;
+    break-inside: avoid-column;
+  }
+}
+
+/* Comments */
+.rfcEditorRemove p:first-of-type {
+  font-style: italic;
+}
+.cref {
+  background-color: rgba(249, 232, 105, 0.3);
+  padding: 2px 4px;
+}
+.crefSource {
+  font-style: italic;
+}
+
+@media screen {
+  #toc nav {
+    font-family: var(--font-title);
+    font-weight: 360;
+    & > ul { margin-bottom: 2em; }
+    & ul {
+      margin: 0 0 0 4px;
+      & :is(p, li) {
+        margin: 2px 0;
+      }
+    }
+  }
+  #toc a.toplink {
+    float: right;
+  }
+}
+@media not screen {
+  #toc a.toplink {
+    display: none;
+  }
+}
+
+
+/* TOC layout for smaller screens */
+@media screen and (max-width: 929px) {
+  #toc {
+    position: fixed;
+    z-index: 2;
+    top: 0;
+    right: 0;
+    padding: 1px 0 0 0;
+    margin: 0;
+    border-bottom: 1px solid #ccc;
+    opacity: 0.6;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 2px 0 2px 6px;
+    padding-right: 1em;
+    font-size: 18px;
+    line-height: 24px;
+    min-width: 190px;
+    text-align: right;
+    background-color: #444;
+    color: white;
+    cursor: pointer;
+    &::before { /* css hamburger */
+      float: right;
+      position: relative;
+      width: 1em;
+      height: 1px;
+      left: -164px;
+      margin: 8px 0 0 0;
+      background: white none repeat scroll 0 0;
+      box-shadow: 0 4px 0 0 white, 0 8px 0 0 white;
+      content: "";
+    }
+  }
+  #toc nav {
+    display: none;
+    background-color: var(--background-color);
+    padding: 0.5em 1em 1em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    height: calc(100vh - 48px);
+    border-left: 1px solid #ddd;
+  }
+  #toc.active {
+    opacity: 1;
+    & nav { display: block; }
+  }
+  /* Make the collapsed ToC header render white on gray also when it's a link */
+  #toc h2 a,
+  #toc h2 a:is(:link, :focus, :hover),
+  #toc a.toplink,
+  #toc a.toplink:hover {
+    color: white;
+    background-color: #444;
+    text-decoration: none;
+  }
+  #toc a.toplink {
+    margin: 2px 0.5em 0;
+  }
+}
+
+/* TOC layout for wide screens */
+@media screen and (min-width: 930px) {
+  body {
+    padding-right: 360px;
+    padding-right: calc(min(180px + 20%, 500px));
+  }
+  #toc {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    right: calc(50vw - 480px);
+    width: 312px;
+    margin: 0;
+    padding: 0;
+    z-index: 1;
+  }
+  #toc h2 {
+    margin: 0;
+    padding: 0.25em 1em 1em 0;
+  }
+  #toc nav {
+    display: block;
+    height: calc(90vh - 84px);
+    bottom: 0;
+    padding: 0.5em 0 2em;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-width: thin;
+  }
+  img { /* future proofing */
+    max-width: 100%;
+    height: auto;
+  }
+  #toc a.toplink {
+    margin: 8px 0.5em 0;
+  }
+}
+
+/* pagination */
+@media print {
+  body {
+    width: 100%;
+  }
+  p {
+    orphans: 3;
+    widows: 3;
+  }
+  #n-copyright-notice {
+    border-bottom: none;
+  }
+  #toc, #n-introduction {
+    page-break-before: always;
+  }
+  #toc {
+    border-top: none;
+    padding-top: 0;
+  }
+  figure, pre, .vcard {
+    page-break-inside: avoid;
+  }
+  h1, h2, h3, h4, h5, h6 {
+    page-break-after: avoid;
+  }
+  :is(h2, h3, h4, h5, h6)+*, dd {
+    page-break-before: avoid;
+  }
+  pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    font-size: 10pt;
+  }
+  table {
+    border: 1px solid #ddd;
+  }
+  td {
+    border-top: 1px solid #ddd;
+  }
+}
+
+@page :first {
+  padding-top: 0;
+  @top-left {
+    content: normal;
+    border: none;
+  }
+  @top-center {
+    content: normal;
+    border: none;
+  }
+  @top-right {
+    content: normal;
+    border: none;
+  }
+}
+
+@page {
+  size: A4;
+  margin-bottom: 45mm;
+  padding-top: 20px;
+}
+
+/* Dark mode. */
+@media (prefers-color-scheme: dark) {
+:root {
+  --background-color: #121212;
+  --text-color: #f0f0f0;
+  --title-color: #fff;
+  --link-color: #4da4f0;
+  --highlight-color: #282828;
+  --line-color: #444;
+  --pilcrow-weak: #444;
+  --pilcrow-strong: #666;
+  scrollbar-color: #777 #333;
+}
+}
+
+/* SVG Trick: a prefix match works because only black and white are allowed */
+svg :is([stroke="black"], [stroke^="#000"]) {
+  stroke: var(--text-color);
+}
+svg :is([stroke="white"], [stroke^="#fff"]) {
+  stroke: var(--background-color);
+}
+svg :is([fill="black"], [fill^="#000"], :not([fill])) {
+  fill: var(--text-color);
+}
+svg :is([fill="white"], [fill^="#fff"]) {
+  fill: var(--background-color);
+}
+</style>
+
+</head>
+<body class="xml2rfc">
+<table class="ears">
+<thead><tr>
+<td class="left">Internet-Draft</td>
+<td class="center">CBOR42</td>
+<td class="right">November 2025</td>
+</tr></thead>
+<tfoot><tr>
+<td class="left">Caballero &amp; Berjon</td>
+<td class="center">Expires 7 May 2026</td>
+<td class="right">[Page]</td>
+</tr></tfoot>
+</table>
+<div id="external-metadata" class="document-information"></div>
+<div id="internal-metadata" class="document-information">
+<dl id="identifiers">
+<dt class="label-workgroup">Workgroup:</dt>
+<dd class="workgroup">Concise Binary Object Representation Maintenance and Extensions</dd>
+<dt class="label-internet-draft">Internet-Draft:</dt>
+<dd class="internet-draft">draft-caballero-cbor-cbor42-latest</dd>
+<dt class="label-published">Published:</dt>
+<dd class="published">
+<time datetime="2025-11-03" class="published">3 November 2025</time>
+    </dd>
+<dt class="label-intended-status">Intended Status:</dt>
+<dd class="intended-status">Informational</dd>
+<dt class="label-expires">Expires:</dt>
+<dd class="expires"><time datetime="2026-05-07">7 May 2026</time></dd>
+<dt class="label-authors">Authors:</dt>
+<dd class="authors">
+<div class="author">
+      <div class="author-name">J. Caballero</div>
+<div class="org">IPFS Foundation</div>
+</div>
+<div class="author">
+      <div class="author-name">R. Berjon</div>
+<div class="org">IPFS Foundation</div>
+</div>
+</dd>
+</dl>
+</div>
+<h1 id="title">The tag-42 profile of CBOR</h1>
+<section id="section-abstract">
+      <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
+<p id="section-abstract-1">This document defines a very narrow profile of CBOR intended for use with the special tag 42.
+Like the earlier internet-draft submitted under the name "CBOR Core," much of its design dates to the first CBOR RFC and predates much of the layered approach to determinism and profiling in later years.<a href="#section-abstract-1" class="pilcrow">¶</a></p>
+<p id="section-abstract-2">Also like "CBOR/c", CBOR-42 can be used as an internet-scale serialization for JSON, and is optimized for objects that compose into a directed acyclical graph.
+Since CBOR-42 objects link to one another by hash-based identifiers tagged "42", deterministic encoding is mandated to verify dereferenced links and encode new ones.<a href="#section-abstract-2" class="pilcrow">¶</a></p>
+</section>
+<section class="note rfcEditorRemove" id="section-note.1">
+      <h2 id="name-about-this-document">
+<a href="#name-about-this-document" class="section-name selfRef">About This Document</a>
+      </h2>
+<p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
+<p id="section-note.1-2">
+        The latest revision of this draft can be found at <span><a href="https://ipfs-tech.github.io/cborc42/draft-caballero-cbor-cborc42.html">https://ipfs-tech.github.io/cborc42/draft-caballero-cbor-cborc42.html</a></span>.
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-caballero-cbor-cbor42/">https://datatracker.ietf.org/doc/draft-caballero-cbor-cbor42/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+<p id="section-note.1-3">
+        Discussion of this document takes place on the
+        Concise Binary Object Representation Maintenance and Extensions  mailing list (<span><a href="mailto:cbor@ietf.org">mailto:cbor@ietf.org</a></span>),
+        which is archived at <span><a href="https://www.ietf.org/mail-archive/web/cbor/current/maillist.html">https://www.ietf.org/mail-archive/web/cbor/current/maillist.html</a></span>.
+        Subscribe at <span><a href="https://www.ietf.org/mailman/listinfo/cbor/">https://www.ietf.org/mailman/listinfo/cbor/</a></span>.<a href="#section-note.1-3" class="pilcrow">¶</a></p>
+<p id="section-note.1-4">Source for this draft and an issue tracker can be found at
+        <span><a href="https://github.com/ipfs-tech/cborc42">https://github.com/ipfs-tech/cborc42</a></span>.<a href="#section-note.1-4" class="pilcrow">¶</a></p>
+</section>
+<div id="status-of-memo">
+<section id="section-boilerplate.1">
+        <h2 id="name-status-of-this-memo">
+<a href="#name-status-of-this-memo" class="section-name selfRef">Status of This Memo</a>
+        </h2>
+<p id="section-boilerplate.1-1">
+        This Internet-Draft is submitted in full conformance with the
+        provisions of BCP 78 and BCP 79.<a href="#section-boilerplate.1-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-2">
+        Internet-Drafts are working documents of the Internet Engineering Task
+        Force (IETF). Note that other groups may also distribute working
+        documents as Internet-Drafts. The list of current Internet-Drafts is
+        at <span><a href="https://datatracker.ietf.org/drafts/current/">https://datatracker.ietf.org/drafts/current/</a></span>.<a href="#section-boilerplate.1-2" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-3">
+        Internet-Drafts are draft documents valid for a maximum of six months
+        and may be updated, replaced, or obsoleted by other documents at any
+        time. It is inappropriate to use Internet-Drafts as reference
+        material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.1-4">
+        This Internet-Draft will expire on 7 May 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="copyright">
+<section id="section-boilerplate.2">
+        <h2 id="name-copyright-notice">
+<a href="#name-copyright-notice" class="section-name selfRef">Copyright Notice</a>
+        </h2>
+<p id="section-boilerplate.2-1">
+            Copyright (c) 2025 IETF Trust and the persons identified as the
+            document authors. All rights reserved.<a href="#section-boilerplate.2-1" class="pilcrow">¶</a></p>
+<p id="section-boilerplate.2-2">
+            This document is subject to BCP 78 and the IETF Trust's Legal
+            Provisions Relating to IETF Documents
+            (<span><a href="https://trustee.ietf.org/license-info">https://trustee.ietf.org/license-info</a></span>) in effect on the date of
+            publication of this document. Please review these documents
+            carefully, as they describe your rights and restrictions with
+            respect to this document. Code Components extracted from this
+            document must include Revised BSD License text as described in
+            Section 4.e of the Trust Legal Provisions and are provided without
+            warranty as described in the Revised BSD License.<a href="#section-boilerplate.2-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="toc">
+<section id="section-toc.1">
+        <a href="#" onclick="scroll(0,0)" class="toplink">▲</a><h2 id="name-table-of-contents">
+<a href="#name-table-of-contents" class="section-name selfRef">Table of Contents</a>
+        </h2>
+<nav class="toc"><ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1">
+            <p id="section-toc.1-1.1.1"><a href="#section-1" class="auto internal xref">1</a>.  <a href="#name-introduction" class="internal xref">Introduction</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.1">
+                <p id="section-toc.1-1.1.2.1.1" class="keepWithNext"><a href="#section-1.1" class="auto internal xref">1.1</a>.  <a href="#name-design-goals" class="internal xref">Design Goals</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.2">
+                <p id="section-toc.1-1.1.2.2.1" class="keepWithNext"><a href="#section-1.2" class="auto internal xref">1.2</a>.  <a href="#name-requirements-language" class="internal xref">Requirements Language</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.1.2.3">
+                <p id="section-toc.1-1.1.2.3.1" class="keepWithNext"><a href="#section-1.3" class="auto internal xref">1.3</a>.  <a href="#name-common-definitions" class="internal xref">Common Definitions</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2">
+            <p id="section-toc.1-1.2.1"><a href="#section-2" class="auto internal xref">2</a>.  <a href="#name-specification" class="internal xref">Specification</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.1">
+                <p id="section-toc.1-1.2.2.1.1"><a href="#section-2.1" class="auto internal xref">2.1</a>.  <a href="#name-supported-cbor-objects" class="internal xref">Supported CBOR Objects</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.2">
+                <p id="section-toc.1-1.2.2.2.1"><a href="#section-2.2" class="auto internal xref">2.2</a>.  <a href="#name-deterministic-encoding-sche" class="internal xref">Deterministic Encoding Scheme Profile</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3">
+                <p id="section-toc.1-1.2.2.3.1"><a href="#section-2.3" class="auto internal xref">2.3</a>.  <a href="#name-cbor-tool-requirements" class="internal xref">CBOR Tool Requirements</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3.2.1">
+                    <p id="section-toc.1-1.2.2.3.2.1.1"><a href="#section-2.3.1" class="auto internal xref">2.3.1</a>.  <a href="#name-protocol-primitives" class="internal xref">Protocol Primitives</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3.2.2">
+                    <p id="section-toc.1-1.2.2.3.2.2.1"><a href="#section-2.3.2" class="auto internal xref">2.3.2</a>.  <a href="#name-media-type" class="internal xref">Media Type</a></p>
+</li>
+                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3.2.3">
+                    <p id="section-toc.1-1.2.2.3.2.3.1"><a href="#section-2.3.3" class="auto internal xref">2.3.3</a>.  <a href="#name-cbor-sequences" class="internal xref">CBOR Sequences</a></p>
+</li>
+                </ul>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.3">
+            <p id="section-toc.1-1.3.1"><a href="#section-3" class="auto internal xref">3</a>.  <a href="#name-security-considerations" class="internal xref">Security Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.4">
+            <p id="section-toc.1-1.4.1"><a href="#section-4" class="auto internal xref">4</a>.  <a href="#name-iana-considerations" class="internal xref">IANA Considerations</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5">
+            <p id="section-toc.1-1.5.1"><a href="#section-5" class="auto internal xref">5</a>.  <a href="#name-references" class="internal xref">References</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.1">
+                <p id="section-toc.1-1.5.2.1.1"><a href="#section-5.1" class="auto internal xref">5.1</a>.  <a href="#name-normative-references" class="internal xref">Normative References</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.5.2.2">
+                <p id="section-toc.1-1.5.2.2.1"><a href="#section-5.2" class="auto internal xref">5.2</a>.  <a href="#name-informative-references" class="internal xref">Informative References</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6">
+            <p id="section-toc.1-1.6.1"><a href="#appendix-A" class="auto internal xref">Appendix A</a>.  <a href="#name-binary-content-identifiers" class="internal xref">Binary Content Identifiers</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.6.2.1">
+                <p id="section-toc.1-1.6.2.1.1"><a href="#appendix-A.1" class="auto internal xref">A.1</a>.  <a href="#name-legacy-support" class="internal xref">Legacy Support</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7">
+            <p id="section-toc.1-1.7.1"><a href="#appendix-B" class="auto internal xref">Appendix B</a>.  <a href="#name-test-vectors" class="internal xref">Test Vectors</a></p>
+<ul class="compact toc ulBare ulEmpty">
+<li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.1">
+                <p id="section-toc.1-1.7.2.1.1"><a href="#appendix-B.1" class="auto internal xref">B.1</a>.  <a href="#name-integers" class="internal xref">Integers</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.2">
+                <p id="section-toc.1-1.7.2.2.1"><a href="#appendix-B.2" class="auto internal xref">B.2</a>.  <a href="#name-floating-point-numbers" class="internal xref">Floating Point Numbers</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.3">
+                <p id="section-toc.1-1.7.2.3.1"><a href="#appendix-B.3" class="auto internal xref">B.3</a>.  <a href="#name-miscellaneous-items" class="internal xref">Miscellaneous Items</a></p>
+</li>
+              <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.7.2.4">
+                <p id="section-toc.1-1.7.2.4.1"><a href="#appendix-B.4" class="auto internal xref">B.4</a>.  <a href="#name-invalid-encodings" class="internal xref">Invalid Encodings</a></p>
+</li>
+            </ul>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.8">
+            <p id="section-toc.1-1.8.1"><a href="#appendix-C" class="auto internal xref">Appendix C</a>.  <a href="#name-configuration-and-aldrs" class="internal xref">Configuration and ALDRs</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.9">
+            <p id="section-toc.1-1.9.1"><a href="#appendix-D" class="auto internal xref">Appendix D</a>.  <a href="#name-decoding-strictness" class="internal xref">Decoding Strictness</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.10">
+            <p id="section-toc.1-1.10.1"><a href="#appendix-E" class="auto internal xref"></a><a href="#name-acknowledgments" class="internal xref">Acknowledgments</a></p>
+</li>
+          <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.11">
+            <p id="section-toc.1-1.11.1"><a href="#appendix-F" class="auto internal xref"></a><a href="#name-authors-addresses" class="internal xref">Authors' Addresses</a></p>
+</li>
+        </ul>
+</nav>
+</section>
+</div>
+<div id="introduction">
+<section id="section-1">
+      <h2 id="name-introduction">
+<a href="#section-1" class="section-number selfRef">1. </a><a href="#name-introduction" class="section-name selfRef">Introduction</a>
+      </h2>
+<p id="section-1-1">The developer ecosystem around the Interplanetary File System, a distributed system file and document handling, has long made structural usage of its own home-grown CBOR profile, dating from the early days of the CBOR working group and fine-tuned over the years in community/internal venues.
+Configuring CBOR tooling in various languages to decode this data and encode new data conformantly has been a challenge, and a unified specification (updated to modern terminology, as the CBOR working group has iterated and evolved so much in the intervening years) is set out in this document.<a href="#section-1-1" class="pilcrow">¶</a></p>
+<p id="section-1-2">Note: unlike the CBOR/c specification, no opinion on best practices for hashing or signing mechanisms is expressed here, and will be addressed in separate documents, if at all.<a href="#section-1-2" class="pilcrow">¶</a></p>
+<div id="design-goals">
+<section id="section-1.1">
+        <h3 id="name-design-goals">
+<a href="#section-1.1" class="section-number selfRef">1.1. </a><a href="#name-design-goals" class="section-name selfRef">Design Goals</a>
+        </h3>
+<p id="section-1.1-1">The primary goal of this specification is enabling application developers to configure CBOR tooling for this profile, and for CBOR tooling to support such configuration, in as language-agnostic a way as possible.
+The historical design of this profile was to maximize determinism and simplicity for an internet-scale directed acyclical graph of CBOR documents linked to one another by binary hashes.
+These simple content identifiers, defined in Appendix A, are always expressed as bytestrings of tag 42 (similar in design to <span>[<a href="#RFC6920" class="cite xref">RFC6920</a>]</span> Named Information Hashes).
+All other tags, and many major and minor types, are forbidden to reduce ambiguity, and developers are encouraged to express many kinds of data at higher layers by using the supported types (such as strings or bytestrings).<a href="#section-1.1-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="requirements-language">
+<section id="section-1.2">
+        <h3 id="name-requirements-language">
+<a href="#section-1.2" class="section-number selfRef">1.2. </a><a href="#name-requirements-language" class="section-name selfRef">Requirements Language</a>
+        </h3>
+<p id="section-1.2-1">The key words "<span class="bcp14">MUST</span>", "<span class="bcp14">MUST NOT</span>", "<span class="bcp14">REQUIRED</span>", "<span class="bcp14">SHALL</span>", "<span class="bcp14">SHALL NOT</span>", "<span class="bcp14">SHOULD</span>", "<span class="bcp14">SHOULD NOT</span>", "<span class="bcp14">RECOMMENDED</span>", "<span class="bcp14">NOT RECOMMENDED</span>",
+"<span class="bcp14">MAY</span>", and "<span class="bcp14">OPTIONAL</span>" in this document are to be interpreted as
+described in BCP 14 <span>[<a href="#RFC2119" class="cite xref">RFC2119</a>]</span> <span>[<a href="#RFC8174" class="cite xref">RFC8174</a>]</span> when, and only when, they
+appear in all capitals, as shown here.<a href="#section-1.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="common-definitions">
+<section id="section-1.3">
+        <h3 id="name-common-definitions">
+<a href="#section-1.3" class="section-number selfRef">1.3. </a><a href="#name-common-definitions" class="section-name selfRef">Common Definitions</a>
+        </h3>
+<ul class="normal">
+<li class="normal" id="section-1.3-1.1">
+            <p id="section-1.3-1.1.1">This document uses the conventions defined in CDDL <span>[<a href="#RFC8610" class="cite xref">RFC8610</a>]</span> for expressing the type of CBOR <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span> data items.<a href="#section-1.3-1.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.3-1.2">
+            <p id="section-1.3-1.2.1">Examples showing CBOR data, are expressed in "diagnostic notation" as defined in Section 8 of <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>.<a href="#section-1.3-1.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.3-1.3">
+            <p id="section-1.3-1.3.1">The term "CBOR object" is equivalent to "CBOR data item" used in <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>.<a href="#section-1.3-1.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-1.3-1.4">
+            <p id="section-1.3-1.4.1">The term "CBOR Core" is in this document abbreviated to "CBOR/c".<a href="#section-1.3-1.4.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+</section>
+</div>
+<div id="specification">
+<section id="section-2">
+      <h2 id="name-specification">
+<a href="#section-2" class="section-number selfRef">2. </a><a href="#name-specification" class="section-name selfRef">Specification</a>
+      </h2>
+<p id="section-2-1">This section describes how CBOR-42 subsets CBOR and differs from a standard CDE encoding.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<div id="supported-cbor-objects">
+<section id="section-2.1">
+        <h3 id="name-supported-cbor-objects">
+<a href="#section-2.1" class="section-number selfRef">2.1. </a><a href="#name-supported-cbor-objects" class="section-name selfRef">Supported CBOR Objects</a>
+        </h3>
+<table class="center" id="table-1">
+          <caption><a href="#table-1" class="selfRef">Table 1</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">CBOR</th>
+              <th class="text-left" rowspan="1" colspan="1">Comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">int</td>
+              <td class="text-left" rowspan="1" colspan="1">Integer</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">float</td>
+              <td class="text-left" rowspan="1" colspan="1">64-bit <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> numbers ONLY</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">tstr</td>
+              <td class="text-left" rowspan="1" colspan="1">Text string encoded as UTF-8 <span>[<a href="#RFC3629" class="cite xref">RFC3629</a>]</span>
+</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">bstr</td>
+              <td class="text-left" rowspan="1" colspan="1">Byte string</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">[]</td>
+              <td class="text-left" rowspan="1" colspan="1">Array</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">{}</td>
+              <td class="text-left" rowspan="1" colspan="1">Map</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">tag 42</td>
+              <td class="text-left" rowspan="1" colspan="1">See Appendix A; no other tags allowed</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">bool</td>
+              <td class="text-left" rowspan="1" colspan="1">Boolean true and false (major type 7)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">null</td>
+              <td class="text-left" rowspan="1" colspan="1">Represents a null object (major type 7)</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="deterministic-encoding-scheme-profile">
+<section id="section-2.2">
+        <h3 id="name-deterministic-encoding-sche">
+<a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-deterministic-encoding-sche" class="section-name selfRef">Deterministic Encoding Scheme Profile</a>
+        </h3>
+<p id="section-2.2-1">As in CBOR/c, deterministic encoding is mandatory. The encoding scheme adheres to Section 4.2 of <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>, but adds a few constraints (denoted below by RFC+), where this RFC offers choices. The following list contains a summary of the deterministic encoding rules:<a href="#section-2.2-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.2-2.1">
+            <p id="section-2.2-2.1.1">RFC+: Floating-point and integer objects <span class="bcp14">MUST</span> be treated as distinct types regardless of their numeric value. This is compliant with Rule 2 in Section 4.2.2 of <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>.<a href="#section-2.2-2.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.2-2.2">
+            <p id="section-2.2-2.2.1">RFC: Integers, represented by the int and bigint types, <span class="bcp14">MUST</span> use the int type if the value is between -2^64 and 2^64-1; otherwise, as with timestamp data, they must be encoded at higher layers, whether as bytestrings or strings.<a href="#section-2.2-2.2.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.2-2.2.2.1">
+                <p id="section-2.2-2.2.2.1.1">Appendix B.1 features a list of integer sample values and their expected encoding.<a href="#section-2.2-2.2.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
+</li>
+          <li class="normal" id="section-2.2-2.3">
+            <p id="section-2.2-2.3.1">RFC+: UNLIKE CBOR/c and standard CDE encoding, floating-point numbers <span class="bcp14">MUST</span> always be encoded using the longest <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> variant. Appendix B.2 features a list of floating-point sample values and their expected encoding.<a href="#section-2.2-2.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.2-2.4">
+            <p id="section-2.2-2.4.1">RFC+: NaN values with payloads (like f97e01), or having the most significant bit set ("signaling"), <span class="bcp14">MUST</span> be rejected. See also Appendix B.4 for invalid NaN variants.<a href="#section-2.2-2.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.2-2.5">
+            <p id="section-2.2-2.5.1">RCF+: UNLIKE CBOR/c and standard CDE encoding, map keys <span class="bcp14">MUST</span> be typed as strings; no other types are allowed as map keys.<a href="#section-2.2-2.5.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.2-2.6">
+            <p id="section-2.2-2.6.1">RFC: Map keys <span class="bcp14">MUST</span> be sorted in the bytewise lexicographic order of their deterministic encoding. Duplicate keys (i.e. keys with identical deterministic bytestring values) <span class="bcp14">MUST</span> be rejected; note that semantic equivalence is not tested. As per the "Canonical CBOR" section (3.9) in <span>[<a href="#RFC7049" class="cite xref">RFC7049</a>]</span>, the following represents a properly sorted map:
+{
+"a": ... ,
+"b": ... ,
+"aa": ...
+}<a href="#section-2.2-2.6.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.2-2.7">
+            <p id="section-2.2-2.7.1">RFC+: Since CBOR encodings according to this specification maintain uniqueness, there are no specific restrictions or tests needed in order to determine map key equivalence. As an (extreme) example, the floating-point numbers 0.0 and -0.0, and the integer number 0 could all get force-typed as three distinct strings (<code>0.0</code>, <code>-0.0</code>, and <code>0</code>) without colliding.<a href="#section-2.2-2.7.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.2-2.8">
+            <p id="section-2.2-2.8.1">RFC: Indefinite length objects <span class="bcp14">MUST</span> be rejected.<a href="#section-2.2-2.8.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+</section>
+</div>
+<div id="cbor-tool-requirements">
+<section id="section-2.3">
+        <h3 id="name-cbor-tool-requirements">
+<a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-cbor-tool-requirements" class="section-name selfRef">CBOR Tool Requirements</a>
+        </h3>
+<p id="section-2.3-1">CBOR-42 is designed to allow hashing and signing in raw form.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.3-2">To make "raw" signing safe and verification of such signatures practical, CBOR tooling capable of the following is required:<a href="#section-2.3-2" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.3-3.1">
+            <p id="section-2.3-3.1.1">It <span class="bcp14">MUST</span> be possible to find out the type of a CBOR object, before it is accessed.<a href="#section-2.3-3.1.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.3-3.2">
+            <p id="section-2.3-3.2.1">It <span class="bcp14">MUST</span> be possible to add, delete, and update the contents of CBOR map and array objects, of decoded CBOR data.<a href="#section-2.3-3.2.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.3-3.3">
+            <p id="section-2.3-3.3.1">It <span class="bcp14">MUST</span> be possible to reserialize decoded CBOR data, be it updated or not.<a href="#section-2.3-3.3.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.3-3.4">
+            <p id="section-2.3-3.4.1">Irrespective of whether CBOR data is decoded, updated, or created programmatically, deterministic encoding <span class="bcp14">MUST</span> be maintained.<a href="#section-2.3-3.4.1" class="pilcrow">¶</a></p>
+</li>
+          <li class="normal" id="section-2.3-3.5">
+            <p id="section-2.3-3.5.1">Invalid or unsupported CBOR constructs, as well as CBOR data not adhering to the deterministic encoding scheme <span class="bcp14">MUST</span> be rejected. See also Appendix D and Appendix B.4.<a href="#section-2.3-3.5.1" class="pilcrow">¶</a></p>
+</li>
+        </ul>
+<div id="protocol-primitives">
+<section id="section-2.3.1">
+          <h4 id="name-protocol-primitives">
+<a href="#section-2.3.1" class="section-number selfRef">2.3.1. </a><a href="#name-protocol-primitives" class="section-name selfRef">Protocol Primitives</a>
+          </h4>
+<p id="section-2.3.1-1">To facilitate cross-platform protocol interoperability, implementers of CBOR-42 compatible tools <span class="bcp14">SHOULD</span> include decoder API support for the following primitives.<a href="#section-2.3.1-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-2">
+            <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
+<thead>
+              <tr>
+                <th class="text-left" rowspan="1" colspan="1">CBOR</th>
+                <th class="text-left" rowspan="1" colspan="1">Primitive</th>
+                <th class="text-left" rowspan="1" colspan="1">Comment</th>
+                <th class="text-left" rowspan="1" colspan="1">Note</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">int</td>
+                <td class="text-left" rowspan="1" colspan="1">Int8</td>
+                <td class="text-left" rowspan="1" colspan="1">8-bit signed integer</td>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">uint</td>
+                <td class="text-left" rowspan="1" colspan="1">Uint8</td>
+                <td class="text-left" rowspan="1" colspan="1">8-bit unsigned integer</td>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">int</td>
+                <td class="text-left" rowspan="1" colspan="1">Int16</td>
+                <td class="text-left" rowspan="1" colspan="1">16-bit signed integer</td>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">uint</td>
+                <td class="text-left" rowspan="1" colspan="1">Uint16</td>
+                <td class="text-left" rowspan="1" colspan="1">16-bit unsigned integer</td>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">int</td>
+                <td class="text-left" rowspan="1" colspan="1">Int32</td>
+                <td class="text-left" rowspan="1" colspan="1">32-bit signed integer</td>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">uint</td>
+                <td class="text-left" rowspan="1" colspan="1">Uint32</td>
+                <td class="text-left" rowspan="1" colspan="1">32-bit unsigned integer</td>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">int</td>
+                <td class="text-left" rowspan="1" colspan="1">Int64</td>
+                <td class="text-left" rowspan="1" colspan="1">64-bit signed integer</td>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">uint</td>
+                <td class="text-left" rowspan="1" colspan="1">Uint64</td>
+                <td class="text-left" rowspan="1" colspan="1">64-bit unsigned integer</td>
+                <td class="text-left" rowspan="1" colspan="1">1</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">float</td>
+                <td class="text-left" rowspan="1" colspan="1">Float64</td>
+                <td class="text-left" rowspan="1" colspan="1">64-bit floating-point number</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">bool</td>
+                <td class="text-left" rowspan="1" colspan="1">Boolean</td>
+                <td class="text-left" rowspan="1" colspan="1">Boolean</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">null</td>
+                <td class="text-left" rowspan="1" colspan="1">Null</td>
+                <td class="text-left" rowspan="1" colspan="1">Null</td>
+                <td class="text-left" rowspan="1" colspan="1">2</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">#7.nnn</td>
+                <td class="text-left" rowspan="1" colspan="1">Simple</td>
+                <td class="text-left" rowspan="1" colspan="1">ONLY null, false, true</td>
+                <td class="text-left" rowspan="1" colspan="1">3</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">tstr</td>
+                <td class="text-left" rowspan="1" colspan="1">String</td>
+                <td class="text-left" rowspan="1" colspan="1">Text string</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">bstr</td>
+                <td class="text-left" rowspan="1" colspan="1">Bytes</td>
+                <td class="text-left" rowspan="1" colspan="1">Byte string</td>
+                <td class="text-left" rowspan="1" colspan="1"> </td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">See note</td>
+                <td class="text-left" rowspan="1" colspan="1">EpochTime</td>
+                <td class="text-left" rowspan="1" colspan="1">Time object expressed as a number</td>
+                <td class="text-left" rowspan="1" colspan="1">4</td>
+              </tr>
+              <tr>
+                <td class="text-left" rowspan="1" colspan="1">See note</td>
+                <td class="text-left" rowspan="1" colspan="1">DateTime</td>
+                <td class="text-left" rowspan="1" colspan="1">Time object expressed as a text string</td>
+                <td class="text-left" rowspan="1" colspan="1">4</td>
+              </tr>
+            </tbody>
+          </table>
+<ol start="1" type="1" class="normal type-1" id="section-2.3.1-3">
+<li id="section-2.3.1-3.1">
+              <p id="section-2.3.1-3.1.1">Range testing <span class="bcp14">MUST</span> be performed using the traditional ranges for unsigned respectively two-complement numbers. That is, a hypothetical getUint8() <span class="bcp14">MUST</span> reject numbers outside of 0 to 255, whereas a hypothetical getInt8(), <span class="bcp14">MUST</span> reject numbers outside of -128 to 127.<a href="#section-2.3.1-3.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-2.3.1-3.2">
+              <p id="section-2.3.1-3.2.1">Since a CBOR null typically represents the absence of a value, a decoder <span class="bcp14">MUST</span> provide a test-function, like isNull().<a href="#section-2.3.1-3.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-2.3.1-3.3">
+              <p id="section-2.3.1-3.3.1">Simple values in CBOR and CBOR/c include the ranges 0-23 and 32-255, all but three of which are invalid in CBOR-42; however, the capability to refer to boolean values (i.e. <code>true</code> and <code>false</code>) and <code>null</code> as major-type 7 simple values <span class="bcp14">MUST</span> be supported to guarantee interoperability with CBOR tooling generally.<a href="#section-2.3.1-3.3.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="section-2.3.1-3.4">
+              <p id="section-2.3.1-3.4.1">Since CBOR lacks a native-level time object, Section 3.4 of <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span> introduces two variants of time objects using the CBOR tags 0 and 1, neither of which are supported by the CBOR/c-42 data model for historical interoperability reasons. To support time encoding stably, it is <span class="bcp14">RECOMMENDED</span> that EpochTime and/or DateTime types in input be force-typed as strings at the application level or at the ALDR level. Interoperability with other tooling may be difficult to achieve if support for these APIs is desired, and validating dates at higher layers may introduce new security issues at higher layers.<a href="#section-2.3.1-3.4.1" class="pilcrow">¶</a></p>
+</li>
+          </ol>
+<p id="section-2.3.1-4">If a call does not match the underlying CBOR type, the call <span class="bcp14">MUST</span> be rejected.<a href="#section-2.3.1-4" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="media-type">
+<section id="section-2.3.2">
+          <h4 id="name-media-type">
+<a href="#section-2.3.2" class="section-number selfRef">2.3.2. </a><a href="#name-media-type" class="section-name selfRef">Media Type</a>
+          </h4>
+<p id="section-2.3.2-1">Protocols transmitting CBOR-42 over HTTP interfaces are <span class="bcp14">RECOMMENDED</span> to send all CBOR-42 data with a media type header of <code>application/cbor</code>.<a href="#section-2.3.2-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="cbor-sequences">
+<section id="section-2.3.3">
+          <h4 id="name-cbor-sequences">
+<a href="#section-2.3.3" class="section-number selfRef">2.3.3. </a><a href="#name-cbor-sequences" class="section-name selfRef">CBOR Sequences</a>
+          </h4>
+<p id="section-2.3.3-1">Concatenating or streaming CBOR objects is strongly discouraged except in contexts where the <code>application/cbor-seq</code> media type can be used to set decoder expectations appropriately.
+See <span>[<a href="#RFC8742" class="cite xref">RFC8742</a>]</span> for guidance on streaming best practices.<a href="#section-2.3.3-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+</section>
+</div>
+<div id="security-considerations">
+<section id="section-3">
+      <h2 id="name-security-considerations">
+<a href="#section-3" class="section-number selfRef">3. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
+      </h2>
+<p id="section-3-1">It is assumed that CBOR-42 has no novel security issues compared to CBOR Deterministic Encoding as defined in <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span> but the authors would appreciate any hypotheses or evidence to the contrary.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-2">It should be noted that there has been to date little implementer feedback on the ALDR suggestions outlined in the appendices.
+As such, these should be considered as an understudied security surface for the application layer to consider.<a href="#section-3-2" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="iana-considerations">
+<section id="section-4">
+      <h2 id="name-iana-considerations">
+<a href="#section-4" class="section-number selfRef">4. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
+      </h2>
+<p id="section-4-1">This document requests no IANA actions.<a href="#section-4-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="sec-combined-references">
+<section id="section-5">
+      <h2 id="name-references">
+<a href="#section-5" class="section-number selfRef">5. </a><a href="#name-references" class="section-name selfRef">References</a>
+      </h2>
+<div id="sec-normative-references">
+<section id="section-5.1">
+        <h3 id="name-normative-references">
+<a href="#section-5.1" class="section-number selfRef">5.1. </a><a href="#name-normative-references" class="section-name selfRef">Normative References</a>
+        </h3>
+<dl class="references">
+<dt id="IEEE754">[IEEE754]</dt>
+        <dd>
+<span class="refTitle">"IEEE Standard for Floating-Point Arithmetic"</span>, <span class="refContent">IEEE</span>, <span class="seriesInfo">DOI 10.1109/ieeestd.2019.8766229</span>, <span class="seriesInfo">ISBN ["9781504459242"]</span>, <time datetime="2019-07" class="refDate">July 2019</time>, <span>&lt;<a href="https://doi.org/10.1109/ieeestd.2019.8766229">https://doi.org/10.1109/ieeestd.2019.8766229</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC2119">[RFC2119]</dt>
+        <dd>
+<span class="refAuthor">Bradner, S.</span>, <span class="refTitle">"Key words for use in RFCs to Indicate Requirement Levels"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 2119</span>, <span class="seriesInfo">DOI 10.17487/RFC2119</span>, <time datetime="1997-03" class="refDate">March 1997</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc2119">https://www.rfc-editor.org/rfc/rfc2119</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC7049">[RFC7049]</dt>
+        <dd>
+<span class="refAuthor">Bormann, C.</span> and <span class="refAuthor">P. Hoffman</span>, <span class="refTitle">"Concise Binary Object Representation (CBOR)"</span>, <span class="seriesInfo">RFC 7049</span>, <span class="seriesInfo">DOI 10.17487/RFC7049</span>, <time datetime="2013-10" class="refDate">October 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc7049">https://www.rfc-editor.org/rfc/rfc7049</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8174">[RFC8174]</dt>
+        <dd>
+<span class="refAuthor">Leiba, B.</span>, <span class="refTitle">"Ambiguity of Uppercase vs Lowercase in RFC 2119 Key Words"</span>, <span class="seriesInfo">BCP 14</span>, <span class="seriesInfo">RFC 8174</span>, <span class="seriesInfo">DOI 10.17487/RFC8174</span>, <time datetime="2017-05" class="refDate">May 2017</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8174">https://www.rfc-editor.org/rfc/rfc8174</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8610">[RFC8610]</dt>
+        <dd>
+<span class="refAuthor">Birkholz, H.</span>, <span class="refAuthor">Vigano, C.</span>, and <span class="refAuthor">C. Bormann</span>, <span class="refTitle">"Concise Data Definition Language (CDDL): A Notational Convention to Express Concise Binary Object Representation (CBOR) and JSON Data Structures"</span>, <span class="seriesInfo">RFC 8610</span>, <span class="seriesInfo">DOI 10.17487/RFC8610</span>, <time datetime="2019-06" class="refDate">June 2019</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8610">https://www.rfc-editor.org/rfc/rfc8610</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8742">[RFC8742]</dt>
+        <dd>
+<span class="refAuthor">Bormann, C.</span>, <span class="refTitle">"Concise Binary Object Representation (CBOR) Sequences"</span>, <span class="seriesInfo">RFC 8742</span>, <span class="seriesInfo">DOI 10.17487/RFC8742</span>, <time datetime="2020-02" class="refDate">February 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8742">https://www.rfc-editor.org/rfc/rfc8742</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC8949">[RFC8949]</dt>
+      <dd>
+<span class="refAuthor">Bormann, C.</span> and <span class="refAuthor">P. Hoffman</span>, <span class="refTitle">"Concise Binary Object Representation (CBOR)"</span>, <span class="seriesInfo">STD 94</span>, <span class="seriesInfo">RFC 8949</span>, <span class="seriesInfo">DOI 10.17487/RFC8949</span>, <time datetime="2020-12" class="refDate">December 2020</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc8949">https://www.rfc-editor.org/rfc/rfc8949</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+<div id="sec-informative-references">
+<section id="section-5.2">
+        <h3 id="name-informative-references">
+<a href="#section-5.2" class="section-number selfRef">5.2. </a><a href="#name-informative-references" class="section-name selfRef">Informative References</a>
+        </h3>
+<dl class="references">
+<dt id="DASL.ING">[DASL.ING]</dt>
+        <dd>
+<span class="refAuthor">Berjon, R.</span> and <span class="refAuthor">J. Caballero</span>, <span class="refTitle">"DASL Content Identifiers"</span>, <time datetime="2024" class="refDate">2024</time>, <span>&lt;<a href="https://dasl.ing/cid.html">https://dasl.ing/cid.html</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="ECMASCRIPT">[ECMASCRIPT]</dt>
+        <dd>
+<span class="refTitle">"ECMAScript® 2024 Language Specification"</span>, <span>n.d.</span>, <span>&lt;<a href="https://www.ecma-international.org/publications/standards/Ecma-262.htm">https://www.ecma-international.org/publications/standards/Ecma-262.htm</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="MULTIFORMATS">[MULTIFORMATS]</dt>
+        <dd>
+<span class="refTitle">"Multiformats Community Registry"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/multiformats/multicodec/">https://github.com/multiformats/multicodec/</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="protobuf">[protobuf]</dt>
+        <dd>
+<span class="refTitle">"Encoding rules and MIME type for Protocol Buffers"</span>, <time datetime="2012" class="refDate">2012</time>, <span>&lt;<a href="https://www.ietf.org/archive/id/draft-rfernando-protocol-buffers-00.txt">https://www.ietf.org/archive/id/draft-rfernando-protocol-buffers-00.txt</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC3629">[RFC3629]</dt>
+        <dd>
+<span class="refAuthor">Yergeau, F.</span>, <span class="refTitle">"UTF-8, a transformation format of ISO 10646"</span>, <span class="seriesInfo">STD 63</span>, <span class="seriesInfo">RFC 3629</span>, <span class="seriesInfo">DOI 10.17487/RFC3629</span>, <time datetime="2003-11" class="refDate">November 2003</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc3629">https://www.rfc-editor.org/rfc/rfc3629</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6256">[RFC6256]</dt>
+        <dd>
+<span class="refAuthor">Eddy, W.</span> and <span class="refAuthor">E. Davies</span>, <span class="refTitle">"Using Self-Delimiting Numeric Values in Protocols"</span>, <span class="seriesInfo">RFC 6256</span>, <span class="seriesInfo">DOI 10.17487/RFC6256</span>, <time datetime="2011-05" class="refDate">May 2011</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6256">https://www.rfc-editor.org/rfc/rfc6256</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+<dt id="RFC6920">[RFC6920]</dt>
+      <dd>
+<span class="refAuthor">Farrell, S.</span>, <span class="refAuthor">Kutscher, D.</span>, <span class="refAuthor">Dannewitz, C.</span>, <span class="refAuthor">Ohlman, B.</span>, <span class="refAuthor">Keranen, A.</span>, and <span class="refAuthor">P. Hallam-Baker</span>, <span class="refTitle">"Naming Things with Hashes"</span>, <span class="seriesInfo">RFC 6920</span>, <span class="seriesInfo">DOI 10.17487/RFC6920</span>, <time datetime="2013-04" class="refDate">April 2013</time>, <span>&lt;<a href="https://www.rfc-editor.org/rfc/rfc6920">https://www.rfc-editor.org/rfc/rfc6920</a>&gt;</span>. </dd>
+<dd class="break"></dd>
+</dl>
+</section>
+</div>
+</section>
+</div>
+<div id="binary-content-identifiers">
+<section id="appendix-A">
+      <h2 id="name-binary-content-identifiers">
+<a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-binary-content-identifiers" class="section-name selfRef">Binary Content Identifiers</a>
+      </h2>
+<p id="appendix-A-1">A simple hash-based "content identifier" is used to link documents in the graph for which CBOR-42 was designed, and tag 42 was registered specifically for those link identifiers in the IANA registry, "Concise Binary Object Representation (CBOR) Tags" created by <a href="https://datatracker.ietf.org/doc/html/rfc8949#section-9.2">Section 9.2</a> of <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">Being able to navigate or generate new links in this graph are strictly unrelated concerns and of course optional for a CBOR-42 encoder and decoder, so this entire section is provided informationally for the purposes of making less opaque the bytestrings marked by tag 42.
+Some CBOR-42 parsers may want to introspect the tag 42 values, if only to know which dereference to other CBOR-42 (or vanilla CBOR) documents.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<p id="appendix-A-3">Note: this describes tag-42 values from the perspective of the CBOR documents in which they are embedded; a simpler, "application developer"-oriented overview of content identifiers can be found at <span>[<a href="#DASL.ING" class="cite xref">DASL.ING</a>]</span>.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
+<p id="appendix-A-4">The format consists of a few sigils prepended to a hash of the linked document; there are many possible values for these sigils but these are like CBOR tags, extension points rather than required features of the system.
+All the sigils and the hash are of variable length, encoded as Self-Delimiting Numeric Values (<span>[<a href="#RFC6256" class="cite xref">RFC6256</a>]</span>).
+The sequence of segments is as follows:<a href="#appendix-A-4" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="appendix-A-5">
+<li id="appendix-A-5.1">
+          <p id="appendix-A-5.1.1">Mandatory padding byte <code>0x00</code>. This is required for interoperability with non-CBOR CID systems and for historical reasons (see Legacy Support section below).<a href="#appendix-A-5.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-5.2">
+          <p id="appendix-A-5.2.1">Version byte: <code>0x01</code> is the only value to expect in a general-purpose tool.  <code>0x00</code> refers to a legacy form explained below, with <code>0x02</code> and <code>0x03</code> reserved for potential future use.<a href="#appendix-A-5.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-5.3">
+          <p id="appendix-A-5.3.1">A contextualizing sigil roughly mapping to content types taken from a community registry called <span>[<a href="#MULTIFORMATS" class="cite xref">MULTIFORMATS</a>]</span>. The only values that all CBOR/c-42 decoders need to recognize are:<a href="#appendix-A-5.3.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="appendix-A-5.3.2">
+<li id="appendix-A-5.3.2.1">
+              <p id="appendix-A-5.3.2.1.1"><code>0x71</code> - CBOR/c-42<a href="#appendix-A-5.3.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="appendix-A-5.3.2.2">
+              <p id="appendix-A-5.3.2.2.1"><code>0x51</code> - Any other form of CBOR<a href="#appendix-A-5.3.2.2.1" class="pilcrow">¶</a></p>
+</li>
+            <li id="appendix-A-5.3.2.3">
+              <p id="appendix-A-5.3.2.3.1"><code>0x55</code> - Raw, unstructured binary<a href="#appendix-A-5.3.2.3.1" class="pilcrow">¶</a></p>
+</li>
+          </ol>
+</li>
+        <li id="appendix-A-5.4">
+          <p id="appendix-A-5.4.1">A hash-function sigil, drawn from the same registry. Likewise, the vast majority of values here are optional extensions; the required hash functions to be aware of are:<a href="#appendix-A-5.4.1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="appendix-A-5.4.2">
+<li id="appendix-A-5.4.2.1">
+              <p id="appendix-A-5.4.2.1.1"><code>0x12</code> - SHA-256<a href="#appendix-A-5.4.2.1.1" class="pilcrow">¶</a></p>
+</li>
+          </ol>
+</li>
+        <li id="appendix-A-5.5">
+          <p id="appendix-A-5.5.1">A hash-length (as SDNV).<a href="#appendix-A-5.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-A-5.6">
+          <p id="appendix-A-5.6.1">The hash (all remaining bytes).<a href="#appendix-A-5.6.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+<div id="legacy-support">
+<section id="appendix-A.1">
+        <h3 id="name-legacy-support">
+<a href="#appendix-A.1" class="section-number selfRef">A.1. </a><a href="#name-legacy-support" class="section-name selfRef">Legacy Support</a>
+        </h3>
+<p id="appendix-A.1-1">Any tag 42 value that does NOT begin with <code>0x00</code> can be considered malformed, and any attempt to recuperate legacy links or variations from such a value is entirely optional.<a href="#appendix-A.1-1" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-2">The most common form of legacy data from deprecated encodings is the historical v0 form IPFS content identifiers, which were always 34 bytes long and consisted only of segments 4 (<code>0x12</code>), 5 (<code>0x20</code>, i.e. 32 bytes) and 6 above (a 32-byte SHA256 hash).
+Prepending <code>0x00</code> (padding byte), <code>0x01</code> (CID version), <code>0x70</code> (DAG-profiled protobuf) turns these into valid "v1" content identifiers, although they still dereference to protobuf objects rather than CBOR objects.
+For guidance on protobuf deserialization, see protobuf.dev or the relevant <span>[<a href="#protobuf" class="cite xref">protobuf</a>]</span> draft RFC.<a href="#appendix-A.1-2" class="pilcrow">¶</a></p>
+<p id="appendix-A.1-3">Likewise, some specialized applications that can strictly assume segments 1-3 or 1-5 will be invariant systemwide have been observed to use "truncated" content identifiers, prepending the invariant prefixes only in transformations at point of egress for interoperability purposes.
+This is not best practice but can also serve as some explanation for the padding byte.<a href="#appendix-A.1-3" class="pilcrow">¶</a></p>
+</section>
+</div>
+</section>
+</div>
+<div id="test-vectors">
+<section id="appendix-B">
+      <h2 id="name-test-vectors">
+<a href="#appendix-B" class="section-number selfRef">Appendix B. </a><a href="#name-test-vectors" class="section-name selfRef">Test Vectors</a>
+      </h2>
+<div id="integers">
+<section id="appendix-B.1">
+        <h3 id="name-integers">
+<a href="#appendix-B.1" class="section-number selfRef">B.1. </a><a href="#name-integers" class="section-name selfRef">Integers</a>
+        </h3>
+<table class="center" id="table-3">
+          <caption><a href="#table-3" class="selfRef">Table 3</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Diagnostic Notation</th>
+              <th class="text-left" rowspan="1" colspan="1">CBOR Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0</td>
+              <td class="text-left" rowspan="1" colspan="1">00</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest positive implicit int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-1</td>
+              <td class="text-left" rowspan="1" colspan="1">20</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest negative implicit int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">23</td>
+              <td class="text-left" rowspan="1" colspan="1">17</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest positive implicit int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-24</td>
+              <td class="text-left" rowspan="1" colspan="1">37</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest negative implicit int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">24</td>
+              <td class="text-left" rowspan="1" colspan="1">1818</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest positive one-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-25</td>
+              <td class="text-left" rowspan="1" colspan="1">3818</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest negative one-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">255</td>
+              <td class="text-left" rowspan="1" colspan="1">18ff</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest positive one-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-256</td>
+              <td class="text-left" rowspan="1" colspan="1">38ff</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest negative one-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">256</td>
+              <td class="text-left" rowspan="1" colspan="1">190100</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest positive two-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-257</td>
+              <td class="text-left" rowspan="1" colspan="1">390100</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest negative two-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">65535</td>
+              <td class="text-left" rowspan="1" colspan="1">19ffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest positive two-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-65536</td>
+              <td class="text-left" rowspan="1" colspan="1">39ffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest negative two-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">65536</td>
+              <td class="text-left" rowspan="1" colspan="1">1a00010000</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest positive four-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-65537</td>
+              <td class="text-left" rowspan="1" colspan="1">3a00010000</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest negative four-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">4294967295</td>
+              <td class="text-left" rowspan="1" colspan="1">1affffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest positive four-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-4294967296</td>
+              <td class="text-left" rowspan="1" colspan="1">3affffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest negative four-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">4294967296</td>
+              <td class="text-left" rowspan="1" colspan="1">1b0000000100000000</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest positive eight-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-4294967297</td>
+              <td class="text-left" rowspan="1" colspan="1">3b0000000100000000</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest negative eight-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">18446744073709551615</td>
+              <td class="text-left" rowspan="1" colspan="1">1bffffffffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest positive eight-byte int</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-18446744073709551616</td>
+              <td class="text-left" rowspan="1" colspan="1">3bffffffffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest negative eight-byte int</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="floating-point-numbers">
+<section id="appendix-B.2">
+        <h3 id="name-floating-point-numbers">
+<a href="#appendix-B.2" class="section-number selfRef">B.2. </a><a href="#name-floating-point-numbers" class="section-name selfRef">Floating Point Numbers</a>
+        </h3>
+<p id="appendix-B.2-1">The textual representation of the values is based on the serialization method for the Number data type, defined by <span>[<a href="#ECMASCRIPT" class="cite xref">ECMASCRIPT</a>]</span> with one change: to comply with diagnostic notation (section 8 of <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>), all values are expressed as floating-point numbers. The rationale for using <span>[<a href="#ECMASCRIPT" class="cite xref">ECMASCRIPT</a>]</span> serialization is because it is supposed to generate the shortest and most correct representation of <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> numbers.<a href="#appendix-B.2-1" class="pilcrow">¶</a></p>
+<table class="center" id="table-4">
+          <caption><a href="#table-4" class="selfRef">Table 4</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Diagnostic Notation</th>
+              <th class="text-left" rowspan="1" colspan="1">CBOR-42 Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">CBOR Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0.0</td>
+              <td class="text-left" rowspan="1" colspan="1">f90000</td>
+              <td class="text-left" rowspan="1" colspan="1">f90000</td>
+              <td class="text-left" rowspan="1" colspan="1">Zero</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-0.0</td>
+              <td class="text-left" rowspan="1" colspan="1">f98000</td>
+              <td class="text-left" rowspan="1" colspan="1">f98000</td>
+              <td class="text-left" rowspan="1" colspan="1">Negative zero</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Infinity</td>
+              <td class="text-left" rowspan="1" colspan="1">invalid</td>
+              <td class="text-left" rowspan="1" colspan="1">f97c00</td>
+              <td class="text-left" rowspan="1" colspan="1">Infinity</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-Infinity</td>
+              <td class="text-left" rowspan="1" colspan="1">invalid</td>
+              <td class="text-left" rowspan="1" colspan="1">f9fc00</td>
+              <td class="text-left" rowspan="1" colspan="1">Negative infinity</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">NaN</td>
+              <td class="text-left" rowspan="1" colspan="1">invalid</td>
+              <td class="text-left" rowspan="1" colspan="1">f97e00</td>
+              <td class="text-left" rowspan="1" colspan="1">Not a number</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">5.960464477539063e-8</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3e70000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">f90001</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest positive subnormal float16</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0.00006097555160522461</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3f0ff80000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">f903ff</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest positive subnormal float16</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0.00006103515625</td>
+              <td class="text-left" rowspan="1" colspan="1">fb 3f10000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">f90400</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest positive float16</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">65504.0</td>
+              <td class="text-left" rowspan="1" colspan="1">fb 40effc0000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">f97bff</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest positive float16</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1.401298464324817e-45</td>
+              <td class="text-left" rowspan="1" colspan="1">fb36a0000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fa00000001</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest positive subnormal float32</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1.1754942106924411e-38</td>
+              <td class="text-left" rowspan="1" colspan="1">fb380fffffc0000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fa007fffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest positive subnormal float32</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1.1754943508222875e-38</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3810000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fa00800000</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest positive float32</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">3.4028234663852886e+38</td>
+              <td class="text-left" rowspan="1" colspan="1">fb 47efffffe0000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fa7f7fffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest positive float32</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">5.0e-324</td>
+              <td class="text-left" rowspan="1" colspan="1">fb0000000000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">fb0000000000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest positive subnormal float64</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">2.225073858507201e-308</td>
+              <td class="text-left" rowspan="1" colspan="1">fb000fffffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">fb000fffffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest positive subnormal float64</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">2.2250738585072014e-308</td>
+              <td class="text-left" rowspan="1" colspan="1">fb0010000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fb0010000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest positive float64</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1.7976931348623157e+308</td>
+              <td class="text-left" rowspan="1" colspan="1">fb7fefffffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">fb7fefffffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Largest positive float64</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-0.0000033333333333333333</td>
+              <td class="text-left" rowspan="1" colspan="1">fbbecbf647612f3696</td>
+              <td class="text-left" rowspan="1" colspan="1">fbbecbf647612f3696</td>
+              <td class="text-left" rowspan="1" colspan="1">Randomly selected number</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">10.559998512268066</td>
+              <td class="text-left" rowspan="1" colspan="1">fb40251eb820000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fa4128f5c1</td>
+              <td class="text-left" rowspan="1" colspan="1">-"-</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">10.559998512268068</td>
+              <td class="text-left" rowspan="1" colspan="1">fb40251eb820000001</td>
+              <td class="text-left" rowspan="1" colspan="1">fb40251eb820000001</td>
+              <td class="text-left" rowspan="1" colspan="1">Next in succession</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">295147905179352830000.0</td>
+              <td class="text-left" rowspan="1" colspan="1">fb 4430000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fa61800000</td>
+              <td class="text-left" rowspan="1" colspan="1">268 (diagnostic notation truncates precision)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">2.0</td>
+              <td class="text-left" rowspan="1" colspan="1">fb4000000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">f94000</td>
+              <td class="text-left" rowspan="1" colspan="1">Number without a fractional part</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-5.960464477539063e-8</td>
+              <td class="text-left" rowspan="1" colspan="1">fbbe70000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">f98001</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest negative subnormal float16</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-5.960464477539062e-8</td>
+              <td class="text-left" rowspan="1" colspan="1">fbbe6fffffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">fbbe6fffffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Adjacent smallest negative subnormal float16</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-5.960464477539064e-8</td>
+              <td class="text-left" rowspan="1" colspan="1">fbbe70000000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">fbbe70000000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">-"-</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-5.960465188081798e-8</td>
+              <td class="text-left" rowspan="1" colspan="1">fbbe70000020000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fab3800001</td>
+              <td class="text-left" rowspan="1" colspan="1">-"-</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0.0000609755516052246</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3f0ff7ffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3f0ff7ffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Adjacent largest subnormal float16</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0.000060975551605224616</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3f0ff80000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3f0ff80000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">-"-</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0.000060975555243203416</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3f0ff8002000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fa387fc001</td>
+              <td class="text-left" rowspan="1" colspan="1">-"-</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0.00006103515624999999</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3f0fffffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3f0fffffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Adjacent smallest float16</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0.00006103515625000001</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3f10000000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3f10000000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">-"-</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0.00006103516352595761</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3f10000020000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fa38800001</td>
+              <td class="text-left" rowspan="1" colspan="1">-"-</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">65503.99999999999</td>
+              <td class="text-left" rowspan="1" colspan="1">fb40effbffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">fb40effbffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Adjacent largest float16</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">65504.00000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">fb40effc0000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">fb40effc0000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">-"-</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">65504.00390625</td>
+              <td class="text-left" rowspan="1" colspan="1">fb40effc0020000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fa477fe001</td>
+              <td class="text-left" rowspan="1" colspan="1">-"-</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1.4012984643248169e-45</td>
+              <td class="text-left" rowspan="1" colspan="1">fb369fffffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">fb369fffffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Adjacent smallest subnormal float32</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1.4012984643248174e-45</td>
+              <td class="text-left" rowspan="1" colspan="1">fb36a0000000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">fb36a0000000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">-"-</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1.175494210692441e-38</td>
+              <td class="text-left" rowspan="1" colspan="1">fb380fffffbfffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">fb380fffffbfffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Adjacent largest subnormal float32</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1.1754942106924412e-38</td>
+              <td class="text-left" rowspan="1" colspan="1">fb380fffffc0000001</td>
+              <td class="text-left" rowspan="1" colspan="1">fb380fffffc0000001</td>
+              <td class="text-left" rowspan="1" colspan="1">-"-</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1.1754943508222874e-38</td>
+              <td class="text-left" rowspan="1" colspan="1">fb380fffffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">fb380fffffffffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Adjacent smallest float32</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1.1754943508222878e-38</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3810000000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3810000000000001</td>
+              <td class="text-left" rowspan="1" colspan="1">-"-</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">3.4028234663852882e+38</td>
+              <td class="text-left" rowspan="1" colspan="1">fb47efffffdfffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">fb47efffffdfffffff</td>
+              <td class="text-left" rowspan="1" colspan="1">Adjacent largest float32</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">3.402823466385289e+38</td>
+              <td class="text-left" rowspan="1" colspan="1">fb47efffffe0000001</td>
+              <td class="text-left" rowspan="1" colspan="1">fb47efffffe0000001</td>
+              <td class="text-left" rowspan="1" colspan="1">-"-</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="miscellaneous-items">
+<section id="appendix-B.3">
+        <h3 id="name-miscellaneous-items">
+<a href="#appendix-B.3" class="section-number selfRef">B.3. </a><a href="#name-miscellaneous-items" class="section-name selfRef">Miscellaneous Items</a>
+        </h3>
+<table class="center" id="table-5">
+          <caption><a href="#table-5" class="selfRef">Table 5</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">Diagnostic Notation</th>
+              <th class="text-left" rowspan="1" colspan="1">CBOR Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">true</td>
+              <td class="text-left" rowspan="1" colspan="1">f5</td>
+              <td class="text-left" rowspan="1" colspan="1">Boolean true (allowed simple value)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">null</td>
+              <td class="text-left" rowspan="1" colspan="1">f6</td>
+              <td class="text-left" rowspan="1" colspan="1">Null (allowed simple value)</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">simple(59)</td>
+              <td class="text-left" rowspan="1" colspan="1">f83b</td>
+              <td class="text-left" rowspan="1" colspan="1">Disallowed simple value</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">59</td>
+              <td class="text-left" rowspan="1" colspan="1">183b</td>
+              <td class="text-left" rowspan="1" colspan="1">unsigned integer</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-59</td>
+              <td class="text-left" rowspan="1" colspan="1">383a</td>
+              <td class="text-left" rowspan="1" colspan="1">signed integer</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">0("2025-03-30T12:24:16Z")</td>
+              <td class="text-left" rowspan="1" colspan="1">c074323032352d30332d33</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">305431323a32343a31365a</td>
+              <td class="text-left" rowspan="1" colspan="1">Disallowed ISO date/time</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">[1, [2, 3], [4, 5]]</td>
+              <td class="text-left" rowspan="1" colspan="1">8301820203820405</td>
+              <td class="text-left" rowspan="1" colspan="1">Array combinations</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">{ "a": 0, "b": 1, "aa": 2}</td>
+              <td class="text-left" rowspan="1" colspan="1">a361610161620262616103</td>
+              <td class="text-left" rowspan="1" colspan="1">Map object</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">h'48656c6c6f2043424f5221'</td>
+              <td class="text-left" rowspan="1" colspan="1">4b48656c6c6f2043424f5221</td>
+              <td class="text-left" rowspan="1" colspan="1">Binary string</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">"🚀 science"</td>
+              <td class="text-left" rowspan="1" colspan="1">6cf09f9a8020736369656e6365</td>
+              <td class="text-left" rowspan="1" colspan="1">Text string with emoji</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+<div id="invalid-encodings">
+<section id="appendix-B.4">
+        <h3 id="name-invalid-encodings">
+<a href="#appendix-B.4" class="section-number selfRef">B.4. </a><a href="#name-invalid-encodings" class="section-name selfRef">Invalid Encodings</a>
+        </h3>
+<table class="center" id="table-6">
+          <caption><a href="#table-6" class="selfRef">Table 6</a></caption>
+<thead>
+            <tr>
+              <th class="text-left" rowspan="1" colspan="1">CBOR Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">Diagnostic Notation</th>
+              <th class="text-left" rowspan="1" colspan="1">Comment</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">a2616201616100</td>
+              <td class="text-left" rowspan="1" colspan="1">{ "b": 1, "a": 0 }</td>
+              <td class="text-left" rowspan="1" colspan="1">Improper map key ordering</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">1900ff</td>
+              <td class="text-left" rowspan="1" colspan="1">255</td>
+              <td class="text-left" rowspan="1" colspan="1">Number with leading zero bytes</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">c34a00010000000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">-18446744073709551617</td>
+              <td class="text-left" rowspan="1" colspan="1">Number with leading zero bytes</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">Fa41280000</td>
+              <td class="text-left" rowspan="1" colspan="1">10.5</td>
+              <td class="text-left" rowspan="1" colspan="1">Not in shortest encoding</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">c243010000</td>
+              <td class="text-left" rowspan="1" colspan="1">65536</td>
+              <td class="text-left" rowspan="1" colspan="1">Incorrect value for bigint</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">fa7fc00000</td>
+              <td class="text-left" rowspan="1" colspan="1">NaN</td>
+              <td class="text-left" rowspan="1" colspan="1">Not in shortest encoding</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">f97e01</td>
+              <td class="text-left" rowspan="1" colspan="1">NaN</td>
+              <td class="text-left" rowspan="1" colspan="1">NaN with payload</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">f97e00</td>
+              <td class="text-left" rowspan="1" colspan="1">NaN</td>
+              <td class="text-left" rowspan="1" colspan="1">NaN disallowed even in shortest encoding</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">5f4101420203ff</td>
+              <td class="text-left" rowspan="1" colspan="1">(_ h'01', h'0203')</td>
+              <td class="text-left" rowspan="1" colspan="1">Indefinite length object</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">fc</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+              <td class="text-left" rowspan="1" colspan="1">Reserved</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">f818</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+              <td class="text-left" rowspan="1" colspan="1">Invalid simple value</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">5b0010000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1"> </td>
+              <td class="text-left" rowspan="1" colspan="1">Extremely large bstr length indicator: 4503599627370496</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">18446744073709551616</td>
+              <td class="text-left" rowspan="1" colspan="1">c249010000000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest positive bigint</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-18446744073709551617</td>
+              <td class="text-left" rowspan="1" colspan="1">c349010000000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest negative bigint</td>
+            </tr>
+          </tbody>
+        </table>
+</section>
+</div>
+</section>
+</div>
+<div id="configuration-and-aldrs">
+<section id="appendix-C">
+      <h2 id="name-configuration-and-aldrs">
+<a href="#appendix-C" class="section-number selfRef">Appendix C. </a><a href="#name-configuration-and-aldrs" class="section-name selfRef">Configuration and ALDRs</a>
+      </h2>
+<p id="appendix-C-1">Someone familiar with the long history of deterministic or canonical CBOR will note that the above specification mixes and matches properties from that history of profiling.
+This creates three major issues for CBOR parsers that are not highly configurable:<a href="#appendix-C-1" class="pilcrow">¶</a></p>
+<ol start="1" type="1" class="normal type-1" id="appendix-C-2">
+<li id="appendix-C-2.1">
+          <p id="appendix-C-2.1.1">The drastically reduced set of types and tags, as well as the requirement that map keys be typed as strings, usually require enforcement at the application layer, i.e. as "ALDR"s.<a href="#appendix-C-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-C-2.2">
+          <p id="appendix-C-2.2.1">Configuring a generic library to <em>encode</em> CBOR according to this profile's map-sorting requirement, when that library does not support <span>[<a href="#RFC7049" class="cite xref">RFC7049</a>]</span> Canonical-CBOR sort mode (sometimes called "legacy" or "lengthfirst"), can be a substantial burden, and may require implementing that sorting algorithm at the application layer if the parser allows preserving map order in input.<a href="#appendix-C-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li id="appendix-C-2.3">
+          <p id="appendix-C-2.3.1">Issues around <code>float</code> reduction are harder to triage at the application layer, although many ALDRs and applications that use this encoding (such as that of the Bluesky social network and the data model of its underlying "Authenticated Transfer Protocol") completely sidestep the issue by simply disallowing floats at the CBOR level, or transcoding floats to a "virtual type" at the application layer, e.g. by retyping floats as strings.<a href="#appendix-C-2.3.1" class="pilcrow">¶</a></p>
+</li>
+      </ol>
+</section>
+</div>
+<div id="decoding-strictness">
+<section id="appendix-D">
+      <h2 id="name-decoding-strictness">
+<a href="#appendix-D" class="section-number selfRef">Appendix D. </a><a href="#name-decoding-strictness" class="section-name selfRef">Decoding Strictness</a>
+      </h2>
+<p id="appendix-D-1">When decoding CBOR data encoded without observing the rules defined above, it recommended that validity rules around allowed types and tags, integer reduction, float reduction, and map sorting follow the looser norms set out in <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>.
+A CBOR-42 application or encoder has no obligation to support re-encoding of such non-profile data according to these looser rules, however, and roundtrip-translation is unlikely to be guaranteed as this was a non-goal of the original design.<a href="#appendix-D-1" class="pilcrow">¶</a></p>
+</section>
+</div>
+<div id="acknowledgments">
+<section id="appendix-E">
+      <h2 id="name-acknowledgments">
+<a href="#name-acknowledgments" class="section-name selfRef">Acknowledgments</a>
+      </h2>
+<p id="appendix-E-1">The authors would like to thank for their guidance over a long period on this and related projects:<a href="#appendix-E-1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="appendix-E-2.1">
+          <p id="appendix-E-2.1.1">Carsten Bormann<a href="#appendix-E-2.1.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.2">
+          <p id="appendix-E-2.2.1">David Buchanan<a href="#appendix-E-2.2.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.3">
+          <p id="appendix-E-2.3.1">Cole Capilongo<a href="#appendix-E-2.3.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.4">
+          <p id="appendix-E-2.4.1">Paul Hoffman<a href="#appendix-E-2.4.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.5">
+          <p id="appendix-E-2.5.1">Dirk Kutscher<a href="#appendix-E-2.5.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.6">
+          <p id="appendix-E-2.6.1">Volker Mische<a href="#appendix-E-2.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.7">
+          <p id="appendix-E-2.7.1">Wolf McNally<a href="#appendix-E-2.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.8">
+          <p id="appendix-E-2.8.1">Bryan Newbold<a href="#appendix-E-2.8.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.9">
+          <p id="appendix-E-2.9.1">Marcin Rataj<a href="#appendix-E-2.9.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.10">
+          <p id="appendix-E-2.10.1">Anders Rundgren<a href="#appendix-E-2.10.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.11">
+          <p id="appendix-E-2.11.1">Rod Vagg<a href="#appendix-E-2.11.1" class="pilcrow">¶</a></p>
+</li>
+      </ul>
+</section>
+</div>
+<div id="authors-addresses">
+<section id="appendix-F">
+      <h2 id="name-authors-addresses">
+<a href="#name-authors-addresses" class="section-name selfRef">Authors' Addresses</a>
+      </h2>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Juan Caballero</span></div>
+<div dir="auto" class="left"><span class="org">IPFS Foundation</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:bumblefudge@learningproof.xyz" class="email">bumblefudge@learningproof.xyz</a>
+</div>
+</address>
+<address class="vcard">
+        <div dir="auto" class="left"><span class="fn nameRole">Robin Berjon</span></div>
+<div dir="auto" class="left"><span class="org">IPFS Foundation</span></div>
+<div class="email">
+<span>Email:</span>
+<a href="mailto:robin@berjon.com" class="email">robin@berjon.com</a>
+</div>
+</address>
+</section>
+</div>
+<script>const toc = document.getElementById("toc");
+toc.querySelector("h2").addEventListener("click", e => {
+  toc.classList.toggle("active");
+});
+toc.querySelector("nav").addEventListener("click", e => {
+  toc.classList.remove("active");
+});
+</script>
+</body>
+</html>
