@@ -5,11 +5,11 @@
 Concise Binary Object Representation Maintenance and ExtensionsJ. Caballero
 Internet-Draft                                                 R. Berjon
 Intended status: Informational                           IPFS Foundation
-Expires: 22 November 2025                                    21 May 2025
+Expires: 7 May 2026                                      3 November 2025
 
 
-                    The tag-42 profile of CBOR Core
-                  draft-caballero-cbor-cborc42-latest
+                       The tag-42 profile of CBOR
+                   draft-caballero-cbor-cbor42-latest
 
 Abstract
 
@@ -35,7 +35,7 @@ About This Document
    The latest revision of this draft can be found at https://ipfs-
    tech.github.io/cborc42/draft-caballero-cbor-cborc42.html.  Status
    information for this document may be found at
-   https://datatracker.ietf.org/doc/draft-caballero-cbor-cborc42/.
+   https://datatracker.ietf.org/doc/draft-caballero-cbor-cbor42/.
 
    Discussion of this document takes place on the Concise Binary Object
    Representation Maintenance and Extensions mailing list
@@ -61,7 +61,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 22 November 2025.
+   This Internet-Draft will expire on 7 May 2026.
 
 Copyright Notice
 
@@ -89,8 +89,7 @@ Table of Contents
      2.3.  CBOR Tool Requirements
        2.3.1.  Protocol Primitives
        2.3.2.  Media Type
-       2.3.3.  Diagnostic Notation
-       2.3.4.  CBOR Sequences
+       2.3.3.  CBOR Sequences
    3.  Security Considerations
    4.  IANA Considerations
    5.  References
@@ -162,7 +161,7 @@ Table of Contents
 
 2.  Specification
 
-   This section describes how CBOR/c-42 subsets CBOR and differs from a
+   This section describes how CBOR-42 subsets CBOR and differs from a
    standard CDE encoding.
 
 2.1.  Supported CBOR Objects
@@ -171,8 +170,6 @@ Table of Contents
            | CBOR   | Comment                                 |
            +========+=========================================+
            | int    | Integer                                 |
-           +--------+-----------------------------------------+
-           | bigint | Big integer                             |
            +--------+-----------------------------------------+
            | float  | 64-bit [IEEE754] numbers ONLY           |
            +--------+-----------------------------------------+
@@ -206,8 +203,9 @@ Table of Contents
       compliant with Rule 2 in Section 4.2.2 of [RFC8949].
 
    *  RFC: Integers, represented by the int and bigint types, MUST use
-      the int type if the value is between -2^64 and 2^64-1, otherwise
-      the bigint type MUST be used.
+      the int type if the value is between -2^64 and 2^64-1; otherwise,
+      as with timestamp data, they must be encoded at higher layers,
+      whether as bytestrings or strings.
 
       -  Appendix B.1 features a list of integer sample values and their
          expected encoding.
@@ -226,7 +224,7 @@ Table of Contents
 
    *  RFC: Map keys MUST be sorted in the bytewise lexicographic order
       of their deterministic encoding.  Duplicate keys (i.e. keys with
-      identical determinstic bytestring values) MUST be rejected; note
+      identical deterministic bytestring values) MUST be rejected; note
       that semantic equivalence is not tested.  As per the "Canonical
       CBOR" section (3.9) in [RFC7049], the following represents a
       properly sorted map: { "a": ... , "b": ... , "aa": ... }
@@ -242,11 +240,7 @@ Table of Contents
 
 2.3.  CBOR Tool Requirements
 
-   As is the case with CBOR/c, CBOR/c-42 is also designed to allow
-   hashing and signing in raw form.  Because of the reduced range of
-   types and tags, many of the tooling requirements made of CBOR/c are
-   not necessary with CBOR/c-42; what follows is an edited version of
-   the requirements proposed by Rundgren's current draft.
+   CBOR-42 is designed to allow hashing and signing in raw form.
 
    To make "raw" signing safe and verification of such signatures
    practical, CBOR tooling capable of the following is required:
@@ -270,7 +264,7 @@ Table of Contents
 2.3.1.  Protocol Primitives
 
    To facilitate cross-platform protocol interoperability, implementers
-   of CBOR/c-42 compatible tools SHOULD include decoder API support for
+   of CBOR-42 compatible tools SHOULD include decoder API support for
    the following primitives.
 
     +==========+===========+===================================+======+
@@ -292,23 +286,21 @@ Table of Contents
     +----------+-----------+-----------------------------------+------+
     | uint     | Uint64    | 64-bit unsigned integer           | 1    |
     +----------+-----------+-----------------------------------+------+
-    | integer  | BigInt    | Integer of arbitrary size         | 2    |
-    +----------+-----------+-----------------------------------+------+
     | float    | Float64   | 64-bit floating-point number      |      |
     +----------+-----------+-----------------------------------+------+
     | bool     | Boolean   | Boolean                           |      |
     +----------+-----------+-----------------------------------+------+
-    | null     | Null      | Null                              | 4    |
+    | null     | Null      | Null                              | 2    |
     +----------+-----------+-----------------------------------+------+
-    | #7.nnn   | Simple    | ONLY null, false, true            | 5    |
+    | #7.nnn   | Simple    | ONLY null, false, true            | 3    |
     +----------+-----------+-----------------------------------+------+
     | tstr     | String    | Text string                       |      |
     +----------+-----------+-----------------------------------+------+
     | bstr     | Bytes     | Byte string                       |      |
     +----------+-----------+-----------------------------------+------+
-    | See note | EpochTime | Time object expressed as a number | 6    |
+    | See note | EpochTime | Time object expressed as a number | 4    |
     +----------+-----------+-----------------------------------+------+
-    | See note | DateTime  | Time object expressed as a text   | 6    |
+    | See note | DateTime  | Time object expressed as a text   | 4    |
     |          |           | string                            |      |
     +----------+-----------+-----------------------------------+------+
 
@@ -320,26 +312,16 @@ Table of Contents
        whereas a hypothetical getInt8(), MUST reject numbers outside of
        -128 to 127.
 
-   2.  Note that a hypothetical getBigInt() MUST also accept CBOR int
-       objects since int is used for integers that fit in CBOR major
-       type 0 and 1 objects.  See also Appendix B.1 and Appendix D.
-
-   3.  Some platforms do not natively support float32 and/or float16.
-       In this case a hypothetical getFloat16() would need to use a
-       bigger floating-point type for the return value.  Note that a
-       hypothetical getFloat16() MUST reject encountered Float32 and
-       Float64 objects.  See also Appendix C.
-
-   4.  Since a CBOR null typically represents the absence of a value, a
+   2.  Since a CBOR null typically represents the absence of a value, a
        decoder MUST provide a test-function, like isNull().
 
-   5.  Simple values in CBOR and CBOR/c include the ranges 0-23 and
-       32-255, all but three of which are invalid in CBOR/c-42; however,
+   3.  Simple values in CBOR and CBOR/c include the ranges 0-23 and
+       32-255, all but three of which are invalid in CBOR-42; however,
        the capability to refer to boolean values (i.e. true and false)
        and null as major-type 7 simple values MUST be supported to
        guarantee interoperability with CBOR tooling generally.
 
-   6.  Since CBOR lacks a native-level time object, Section 3.4 of
+   4.  Since CBOR lacks a native-level time object, Section 3.4 of
        [RFC8949] introduces two variants of time objects using the CBOR
        tags 0 and 1, neither of which are supported by the CBOR/c-42
        data model for historical interoperability reasons.  To support
@@ -350,175 +332,25 @@ Table of Contents
        APIs is desired, and validating dates at higher layers may
        introduce new security issues at higher layers.
 
-   (Note that the preceding is a strict subset of the protocol
-   primitives enumerated by CBOR/c.)
-
    If a call does not match the underlying CBOR type, the call MUST be
    rejected.
 
-   Due to considerable variations between platforms, corresponding
-   encoder API support does not appear to be meaningful to specify in
-   detail: Java doesn't have built-in support for unsigned integers,
-   whereas JavaScript requires the use of the JavaScript BigInt type for
-   dealing with 64-bit integers, etc.
-
 2.3.2.  Media Type
 
-   Protocols transmitting CBOR/c-42 over HTTP interfaces are RECOMMENDED
-   to send all CBOR/c-42 data with a media type header of application/
+   Protocols transmitting CBOR-42 over HTTP interfaces are RECOMMENDED
+   to send all CBOR-42 data with a media type header of application/
    cbor.
 
-2.3.3.  Diagnostic Notation
+2.3.3.  CBOR Sequences
 
-   Compliant CBOR/c implementations SHOULD include support for bi-
-   directional diagnostic notation, to facilitate:
-
-   *  Generation of developer-friendly debugging and logging data
-
-   *  Easy creation of test and configuration data
-
-   Note that decoders for diagnostic notation, MUST always produce
-   deterministically encoded CBOR data, compliant with this
-   specification.  This includes automatic sorting of map keys as well.
-
-   The supported notation is compliant with a subset of Section 8 of
-   [RFC8949] (b32' and encoding indicators were left out), but adds a
-   few items to make diagnostic notation slightly more adapted for
-   parsing, like single-line comments:
-
-   +=========+======================+==========================+=======+
-   | CBOR    | Syntax               | Comment                  | Notes |
-   +=========+======================+==========================+=======+
-   | /       | Multi-line comment.  | 6                        |       |
-   | comment | Multi-line comments  |                          |       |
-   | text /  | are treated as       |                          |       |
-   |         | whitespace and may   |                          |       |
-   |         | thus also be used    |                          |       |
-   |         | between CBOR         |                          |       |
-   |         | objects.             |                          |       |
-   +---------+----------------------+--------------------------+-------+
-   | #       | Single-line comment. | 6                        |       |
-   | comment | Single-line comments |                          |       |
-   | text    | are terminated by a  |                          |       |
-   |         | newline character    |                          |       |
-   |         | ('\n') or EOF.       |                          |       |
-   |         | Single-line comments |                          |       |
-   |         | may also terminate   |                          |       |
-   |         | lines holding        |                          |       |
-   |         | regular CBOR items.  |                          |       |
-   +---------+----------------------+--------------------------+-------+
-   | integer | {sign} { 0b|0o|0x} n | Arbitrary sized          | 1, 2  |
-   |         |                      | integers without         |       |
-   |         |                      | fractional components    |       |
-   |         |                      | or exponents.  See also  |       |
-   |         |                      | CBOR integer encoding.   |       |
-   |         |                      | For input data in        |       |
-   |         |                      | diagnostic notation,     |       |
-   |         |                      | binary, octal, and       |       |
-   |         |                      | hexadecimal notation is  |       |
-   |         |                      | also supported by        |       |
-   |         |                      | prepending numbers with  |       |
-   |         |                      | 0b, 0o, and 0x           |       |
-   |         |                      | respectively.  The       |       |
-   |         |                      | latter also permit       |       |
-   |         |                      | arbitrary insertions of  |       |
-   |         |                      | '_' characters between   |       |
-   |         |                      | digits to enable         |       |
-   |         |                      | grouping of data like    |       |
-   |         |                      | 0b100_000000001.         |       |
-   +---------+----------------------+--------------------------+-------+
-   | float   | {sign} n.n { e±n }   | Floating point values    | 1, 2  |
-   |         |                      | MUST include a decimal   |       |
-   |         |                      | point and at least one   |       |
-   |         |                      | fractional digit,        |       |
-   |         |                      | whereas exponents are    |       |
-   |         |                      | optional.                |       |
-   +---------+----------------------+--------------------------+-------+
-   | float   | NaN                  | Not a number.            |       |
-   +---------+----------------------+--------------------------+-------+
-   | float   | {sign} Infinity      | Infinity.                | 2     |
-   +---------+----------------------+--------------------------+-------+
-   | bstr    | h'hex-data'          | Byte data provided in    | 3     |
-   |         |                      | hexadecimal notation.    |       |
-   |         |                      | Each byte MUST be        |       |
-   |         |                      | represented by two       |       |
-   |         |                      | hexadecimal digits.      |       |
-   +---------+----------------------+--------------------------+-------+
-   | bstr    | b64'base64-data'     | Byte data provided in    | 3, 6  |
-   |         |                      | base64 or base64URL      |       |
-   |         |                      | notation.  Padding with  |       |
-   |         |                      | '=' characters is        |       |
-   |         |                      | optional.                |       |
-   +---------+----------------------+--------------------------+-------+
-   | bstr    | 'text'               | Byte data provided as    | 4, 5, |
-   |         |                      | UTF-8 encoded text.      | 6     |
-   +---------+----------------------+--------------------------+-------+
-   | bstr    | << object... >>      | Construct holding zero   | 6     |
-   |         |                      | or more comma-separated  |       |
-   |         |                      | CBOR objects that are    |       |
-   |         |                      | subsequently wrapped in  |       |
-   |         |                      | a byte string.           |       |
-   +---------+----------------------+--------------------------+-------+
-   | tstr    | "text"               | UTF-8 encoded text       | 4, 5  |
-   |         |                      | string.                  |       |
-   +---------+----------------------+--------------------------+-------+
-   | bool    | true | false         | Boolean value.           |       |
-   +---------+----------------------+--------------------------+-------+
-   | null    | null                 | Null value.              |       |
-   +---------+----------------------+--------------------------+-------+
-   | []      | [ object... ]        | Array with zero or more  |       |
-   |         |                      | comma-separated CBOR     |       |
-   |         |                      | objects.                 |       |
-   +---------+----------------------+--------------------------+-------+
-   | {}      | { key:value... }     | Map with zero or more    |       |
-   |         |                      | comma-separated key/     |       |
-   |         |                      | value pairs.  Key and    |       |
-   |         |                      | value pairs are          |       |
-   |         |                      | expressed as CBOR        |       |
-   |         |                      | objects, separated by a  |       |
-   |         |                      | ':' character.           |       |
-   +---------+----------------------+--------------------------+-------+
-   | #6.nnn  | n ( object )         | Tag holding a CBOR       | 1     |
-   |         |                      | object.                  |       |
-   +---------+----------------------+--------------------------+-------+
-   | #7.nnn  | simple(n)            | Simple value.            | 1     |
-   +---------+----------------------+--------------------------+-------+
-   | ,       | Separator character  | 6                        |       |
-   |         | for CBOR sequences.  |                          |       |
-   +---------+----------------------+--------------------------+-------+
-
-                                  Table 3
-
-   The letter n in the Syntax column denotes one or more digits.  The
-   optional {sign} MUST be a single hyphen ('-') character.  Input only:
-   between the quotes, the whitespace characters (' ', '\t', '\r', '\n')
-   are ignored.  Input only: the control characters '\t' and '\n' inside
-   of string quotes become a part of the text.  For normalizing line
-   terminators, a single '\r' or the combination '\r\n' MUST
-   (internally) be rewritten as '\n'.  To avoid getting newline
-   characters ('\n') included in multi-line text strings, a line
-   continuation marker consisting of a backslash ('') immediately
-   preceding the newline may be used.  Text strings may also include
-   JavaScript compatible escape sequences (''', '"', '\', '\b', '\f',
-   '\n', '\r', '\t', '\uhhhh').  Input only.  The [PLAYGROUND] is an
-   excellent way of getting acquainted with CBOR and diagnostic
-   notation.
-
-2.3.4.  CBOR Sequences
-
-   Decoders compliant with this specification MUST support CBOR
-   sequences [RFC8742].
-
-   For decoders of "true" (binary) CBOR, there are additional
-   requirements:
-
-   It MUST be possible to decode one CBOR object at a time.  The decoder
-   MUST NOT make any assumptions about the nature of unread code (it
-   might not even be CBOR).
+   Concatenating or streaming CBOR objects is strongly discouraged
+   except in contexts where the application/cbor-seq media type can be
+   used to set decoder expectations appropriately.  See [RFC8742] for
+   guidance on streaming best practices.
 
 3.  Security Considerations
 
-   It is assumed that CBOR/c-42 has no novel security issues compared to
+   It is assumed that CBOR-42 has no novel security issues compared to
    CBOR Deterministic Encoding as defined in [RFC8949] but the authors
    would appreciate any hypotheses or evidence to the contrary.
 
@@ -529,7 +361,7 @@ Table of Contents
 
 4.  IANA Considerations
 
-   This document has no IANA actions.
+   This document requests no IANA actions.
 
 5.  References
 
@@ -581,11 +413,6 @@ Table of Contents
               "Multiformats Community Registry", n.d.,
               <https://github.com/multiformats/multicodec/>.
 
-   [PLAYGROUND]
-              "Online CBOR testing tool", n.d.,
-              <https://cyberphone.github.io/CBOR.js/doc/
-              playground.html>.
-
    [protobuf] "Encoding rules and MIME type for Protocol Buffers", 2012,
               <https://www.ietf.org/archive/id/draft-rfernando-protocol-
               buffers-00.txt>.
@@ -606,19 +433,19 @@ Table of Contents
 Appendix A.  Binary Content Identifiers
 
    A simple hash-based "content identifier" is used to link documents in
-   the graph for which CBOR/c-42 was designed, and tag 42 was registered
+   the graph for which CBOR-42 was designed, and tag 42 was registered
    specifically for those link identifiers in the IANA registry,
    "Concise Binary Object Representation (CBOR) Tags" created by
    Section 9.2 (https://datatracker.ietf.org/doc/html/rfc8949#section-
    9.2) of [RFC8949].
 
    Being able to navigate or generate new links in this graph are
-   strictly unrelated concerns and of course optional for a CBOR/c-42
-   encoder and decoder, so this entire section is non-normative and
-   provided informationally for the purposes of making less opaque the
-   bytestrings marked by tag 42.  Some CBOR/c-42 parsers may want to
+   strictly unrelated concerns and of course optional for a CBOR-42
+   encoder and decoder, so this entire section is provided
+   informationally for the purposes of making less opaque the
+   bytestrings marked by tag 42.  Some CBOR-42 parsers may want to
    introspect the tag 42 values, if only to know which dereference to
-   other CBOR/c-42 (or vanilla CBOR) documents.
+   other CBOR-42 (or vanilla CBOR) documents.
 
    Note: this describes tag-42 values from the perspective of the CBOR
    documents in which they are embedded; a simpler, "application
@@ -636,14 +463,13 @@ Appendix A.  Binary Content Identifiers
        interoperability with non-CBOR CID systems and for historical
        reasons (see Legacy Support section below).
 
-   2.  Version byte: 0x01 is the only value worth attempting to parse in
-       a general-purpose tool.  0x00 refers to a legacy form explained
-       below, with 0x02 and 0x03 reserved for potential future use.
+   2.  Version byte: 0x01 is the only value to expect in a general-
+       purpose tool.  0x00 refers to a legacy form explained below, with
+       0x02 and 0x03 reserved for potential future use.
 
-   3.  A contextualizing sigil roughly mapping to content types, with
-       the canonical registry governed by a community registry called
-       [MULTIFORMATS].  The only values that all CBOR/c-42 decoders need
-       to recognize are:
+   3.  A contextualizing sigil roughly mapping to content types taken
+       from a community registry called [MULTIFORMATS].  The only values
+       that all CBOR/c-42 decoders need to recognize are:
 
        1.  0x71 - CBOR/c-42
 
@@ -688,99 +514,71 @@ Appendix B.  Test Vectors
 
 B.1.  Integers
 
-    +=======================+========================+================+
-    | Diagnostic Notation   | CBOR Encoding          | Comment        |
-    +=======================+========================+================+
-    | 0                     | 00                     | Smallest       |
-    |                       |                        | positive       |
-    |                       |                        | implicit int   |
-    +-----------------------+------------------------+----------------+
-    | -1                    | 20                     | Smallest       |
-    |                       |                        | negative       |
-    |                       |                        | implicit int   |
-    +-----------------------+------------------------+----------------+
-    | 23                    | 17                     | Largest        |
-    |                       |                        | positive       |
-    |                       |                        | implicit int   |
-    +-----------------------+------------------------+----------------+
-    | -24                   | 37                     | Largest        |
-    |                       |                        | negative       |
-    |                       |                        | implicit int   |
-    +-----------------------+------------------------+----------------+
-    | 24                    | 1818                   | Smallest       |
-    |                       |                        | positive one-  |
-    |                       |                        | byte int       |
-    +-----------------------+------------------------+----------------+
-    | -25                   | 3818                   | Smallest       |
-    |                       |                        | negative one-  |
-    |                       |                        | byte int       |
-    +-----------------------+------------------------+----------------+
-    | 255                   | 18ff                   | Largest        |
-    |                       |                        | positive one-  |
-    |                       |                        | byte int       |
-    +-----------------------+------------------------+----------------+
-    | -256                  | 38ff                   | Largest        |
-    |                       |                        | negative one-  |
-    |                       |                        | byte int       |
-    +-----------------------+------------------------+----------------+
-    | 256                   | 190100                 | Smallest       |
-    |                       |                        | positive two-  |
-    |                       |                        | byte int       |
-    +-----------------------+------------------------+----------------+
-    | -257                  | 390100                 | Smallest       |
-    |                       |                        | negative two-  |
-    |                       |                        | byte int       |
-    +-----------------------+------------------------+----------------+
-    | 65535                 | 19ffff                 | Largest        |
-    |                       |                        | positive two-  |
-    |                       |                        | byte int       |
-    +-----------------------+------------------------+----------------+
-    | -65536                | 39ffff                 | Largest        |
-    |                       |                        | negative two-  |
-    |                       |                        | byte int       |
-    +-----------------------+------------------------+----------------+
-    | 65536                 | 1a00010000             | Smallest       |
-    |                       |                        | positive four- |
-    |                       |                        | byte int       |
-    +-----------------------+------------------------+----------------+
-    | -65537                | 3a00010000             | Smallest       |
-    |                       |                        | negative four- |
-    |                       |                        | byte int       |
-    +-----------------------+------------------------+----------------+
-    | 4294967295            | 1affffffff             | Largest        |
-    |                       |                        | positive four- |
-    |                       |                        | byte int       |
-    +-----------------------+------------------------+----------------+
-    | -4294967296           | 3affffffff             | Largest        |
-    |                       |                        | negative four- |
-    |                       |                        | byte int       |
-    +-----------------------+------------------------+----------------+
-    | 4294967296            | 1b0000000100000000     | Smallest       |
-    |                       |                        | positive       |
-    |                       |                        | eight-byte int |
-    +-----------------------+------------------------+----------------+
-    | -4294967297           | 3b0000000100000000     | Smallest       |
-    |                       |                        | negative       |
-    |                       |                        | eight-byte int |
-    +-----------------------+------------------------+----------------+
-    | 18446744073709551615  | 1bffffffffffffffff     | Largest        |
-    |                       |                        | positive       |
-    |                       |                        | eight-byte int |
-    +-----------------------+------------------------+----------------+
-    | -18446744073709551616 | 3bffffffffffffffff     | Largest        |
-    |                       |                        | negative       |
-    |                       |                        | eight-byte int |
-    +-----------------------+------------------------+----------------+
-    | 18446744073709551616  | c249010000000000000000 | Smallest       |
-    |                       |                        | positive       |
-    |                       |                        | bigint         |
-    +-----------------------+------------------------+----------------+
-    | -18446744073709551617 | c349010000000000000000 | Smallest       |
-    |                       |                        | negative       |
-    |                       |                        | bigint         |
-    +-----------------------+------------------------+----------------+
+    +=======================+====================+===================+
+    | Diagnostic Notation   | CBOR Encoding      | Comment           |
+    +=======================+====================+===================+
+    | 0                     | 00                 | Smallest positive |
+    |                       |                    | implicit int      |
+    +-----------------------+--------------------+-------------------+
+    | -1                    | 20                 | Smallest negative |
+    |                       |                    | implicit int      |
+    +-----------------------+--------------------+-------------------+
+    | 23                    | 17                 | Largest positive  |
+    |                       |                    | implicit int      |
+    +-----------------------+--------------------+-------------------+
+    | -24                   | 37                 | Largest negative  |
+    |                       |                    | implicit int      |
+    +-----------------------+--------------------+-------------------+
+    | 24                    | 1818               | Smallest positive |
+    |                       |                    | one-byte int      |
+    +-----------------------+--------------------+-------------------+
+    | -25                   | 3818               | Smallest negative |
+    |                       |                    | one-byte int      |
+    +-----------------------+--------------------+-------------------+
+    | 255                   | 18ff               | Largest positive  |
+    |                       |                    | one-byte int      |
+    +-----------------------+--------------------+-------------------+
+    | -256                  | 38ff               | Largest negative  |
+    |                       |                    | one-byte int      |
+    +-----------------------+--------------------+-------------------+
+    | 256                   | 190100             | Smallest positive |
+    |                       |                    | two-byte int      |
+    +-----------------------+--------------------+-------------------+
+    | -257                  | 390100             | Smallest negative |
+    |                       |                    | two-byte int      |
+    +-----------------------+--------------------+-------------------+
+    | 65535                 | 19ffff             | Largest positive  |
+    |                       |                    | two-byte int      |
+    +-----------------------+--------------------+-------------------+
+    | -65536                | 39ffff             | Largest negative  |
+    |                       |                    | two-byte int      |
+    +-----------------------+--------------------+-------------------+
+    | 65536                 | 1a00010000         | Smallest positive |
+    |                       |                    | four-byte int     |
+    +-----------------------+--------------------+-------------------+
+    | -65537                | 3a00010000         | Smallest negative |
+    |                       |                    | four-byte int     |
+    +-----------------------+--------------------+-------------------+
+    | 4294967295            | 1affffffff         | Largest positive  |
+    |                       |                    | four-byte int     |
+    +-----------------------+--------------------+-------------------+
+    | -4294967296           | 3affffffff         | Largest negative  |
+    |                       |                    | four-byte int     |
+    +-----------------------+--------------------+-------------------+
+    | 4294967296            | 1b0000000100000000 | Smallest positive |
+    |                       |                    | eight-byte int    |
+    +-----------------------+--------------------+-------------------+
+    | -4294967297           | 3b0000000100000000 | Smallest negative |
+    |                       |                    | eight-byte int    |
+    +-----------------------+--------------------+-------------------+
+    | 18446744073709551615  | 1bffffffffffffffff | Largest positive  |
+    |                       |                    | eight-byte int    |
+    +-----------------------+--------------------+-------------------+
+    | -18446744073709551616 | 3bffffffffffffffff | Largest negative  |
+    |                       |                    | eight-byte int    |
+    +-----------------------+--------------------+-------------------+
 
-                                  Table 4
+                                 Table 3
 
 B.2.  Floating Point Numbers
 
@@ -793,11 +591,11 @@ B.2.  Floating Point Numbers
    representation of [IEEE754] numbers.
 
    +=========================+==================+==================+===========+
-   |Diagnostic Notation      |CBOR/c-42 Encoding|CBOR/c Encoding   |Comment    |
+   |Diagnostic Notation      |CBOR-42 Encoding  |CBOR Encoding     |Comment    |
    +=========================+==================+==================+===========+
-   |0.0                      |?                 |f90000            |Zero       |
+   |0.0                      |f90000            |f90000            |Zero       |
    +-------------------------+------------------+------------------+-----------+
-   |-0.0                     |?                 |f98000            |Negative   |
+   |-0.0                     |f98000            |f98000            |Negative   |
    |                         |                  |                  |zero       |
    +-------------------------+------------------+------------------+-----------+
    |Infinity                 |invalid           |f97c00            |Infinity   |
@@ -949,7 +747,7 @@ B.2.  Floating Point Numbers
    |3.402823466385289e+38    |fb47efffffe0000001|fb47efffffe0000001|-"-        |
    +-------------------------+------------------+------------------+-----------+
 
-                                  Table 5
+                                  Table 4
 
 B.3.  Miscellaneous Items
 
@@ -988,54 +786,60 @@ B.3.  Miscellaneous Items
    |                         |                          |with emoji   |
    +-------------------------+--------------------------+-------------+
 
-                                 Table 6
+                                 Table 5
 
 B.4.  Invalid Encodings
 
-    +==========================+=====================+================+
-    | CBOR Encoding            |Diagnostic Notation  |Comment         |
-    +==========================+=====================+================+
-    | a2616201616100           |{ "b": 1, "a": 0 }   |Improper map key|
-    |                          |                     |ordering        |
-    +--------------------------+---------------------+----------------+
-    | 1900ff                   |255                  |Number with     |
-    |                          |                     |leading zero    |
-    |                          |                     |bytes           |
-    +--------------------------+---------------------+----------------+
-    | c34a00010000000000000000 |-18446744073709551617|Number with     |
-    |                          |                     |leading zero    |
-    |                          |                     |bytes           |
-    +--------------------------+---------------------+----------------+
-    | Fa41280000               |10.5                 |Not in shortest |
-    |                          |                     |encoding        |
-    +--------------------------+---------------------+----------------+
-    | c243010000               |65536                |Incorrect value |
-    |                          |                     |for bigint      |
-    +--------------------------+---------------------+----------------+
-    | fa7fc00000               |NaN                  |Not in shortest |
-    |                          |                     |encoding        |
-    +--------------------------+---------------------+----------------+
-    | f97e01                   |NaN                  |NaN with payload|
-    +--------------------------+---------------------+----------------+
-    | f97e00                   |NaN                  |NaN disallowed  |
-    |                          |                     |even in shortest|
-    |                          |                     |encoding        |
-    +--------------------------+---------------------+----------------+
-    | 5f4101420203ff           |(_ h'01', h'0203')   |Indefinite      |
-    |                          |                     |length object   |
-    +--------------------------+---------------------+----------------+
-    | fc                       |                     |Reserved        |
-    +--------------------------+---------------------+----------------+
-    | f818                     |                     |Invalid simple  |
-    |                          |                     |value           |
-    +--------------------------+---------------------+----------------+
-    | 5b0010000000000000       |                     |Extremely large |
-    |                          |                     |bstr length     |
-    |                          |                     |indicator:      |
-    |                          |                     |4503599627370496|
-    +--------------------------+---------------------+----------------+
+   +==========================+======================+================+
+   | CBOR Encoding            |Diagnostic Notation   |Comment         |
+   +==========================+======================+================+
+   | a2616201616100           |{ "b": 1, "a": 0 }    |Improper map key|
+   |                          |                      |ordering        |
+   +--------------------------+----------------------+----------------+
+   | 1900ff                   |255                   |Number with     |
+   |                          |                      |leading zero    |
+   |                          |                      |bytes           |
+   +--------------------------+----------------------+----------------+
+   | c34a00010000000000000000 |-18446744073709551617 |Number with     |
+   |                          |                      |leading zero    |
+   |                          |                      |bytes           |
+   +--------------------------+----------------------+----------------+
+   | Fa41280000               |10.5                  |Not in shortest |
+   |                          |                      |encoding        |
+   +--------------------------+----------------------+----------------+
+   | c243010000               |65536                 |Incorrect value |
+   |                          |                      |for bigint      |
+   +--------------------------+----------------------+----------------+
+   | fa7fc00000               |NaN                   |Not in shortest |
+   |                          |                      |encoding        |
+   +--------------------------+----------------------+----------------+
+   | f97e01                   |NaN                   |NaN with payload|
+   +--------------------------+----------------------+----------------+
+   | f97e00                   |NaN                   |NaN disallowed  |
+   |                          |                      |even in shortest|
+   |                          |                      |encoding        |
+   +--------------------------+----------------------+----------------+
+   | 5f4101420203ff           |(_ h'01', h'0203')    |Indefinite      |
+   |                          |                      |length object   |
+   +--------------------------+----------------------+----------------+
+   | fc                       |                      |Reserved        |
+   +--------------------------+----------------------+----------------+
+   | f818                     |                      |Invalid simple  |
+   |                          |                      |value           |
+   +--------------------------+----------------------+----------------+
+   | 5b0010000000000000       |                      |Extremely large |
+   |                          |                      |bstr length     |
+   |                          |                      |indicator:      |
+   |                          |                      |4503599627370496|
+   +--------------------------+----------------------+----------------+
+   | 18446744073709551616     |c249010000000000000000|Smallest        |
+   |                          |                      |positive bigint |
+   +--------------------------+----------------------+----------------+
+   | -18446744073709551617    |c349010000000000000000|Smallest        |
+   |                          |                      |negative bigint |
+   +--------------------------+----------------------+----------------+
 
-                                  Table 7
+                                 Table 6
 
 Appendix C.  Configuration and ALDRs
 
@@ -1046,7 +850,7 @@ Appendix C.  Configuration and ALDRs
 
    1.  The drastically reduced set of types and tags, as well as the
        requirement that map keys be typed as strings, usually require
-       enformcement at the application layer, i.e. as "ALDR"s.
+       enforcement at the application layer, i.e. as "ALDR"s.
 
    2.  Configuring a generic library to _encode_ CBOR according to this
        profile's map-sorting requirement, when that library does not
@@ -1057,8 +861,8 @@ Appendix C.  Configuration and ALDRs
 
    3.  Issues around float reduction are harder to triage at the
        application layer, although many ALDRs and applications that use
-       this encoding (such as that of the BlueSky social network and the
-       data model of its underlying "Authenticated Data Protocol")
+       this encoding (such as that of the Bluesky social network and the
+       data model of its underlying "Authenticated Transfer Protocol")
        completely sidestep the issue by simply disallowing floats at the
        CBOR level, or transcoding floats to a "virtual type" at the
        application layer, e.g. by retyping floats as strings.
@@ -1068,11 +872,11 @@ Appendix D.  Decoding Strictness
    When decoding CBOR data encoded without observing the rules defined
    above, it recommended that validity rules around allowed types and
    tags, integer reduction, float reduction, and map sorting follow the
-   looser norms set out in [RFC8949].  A CBOR/c-42 application or
-   encoder has no obligation to support re-encoding of such non-profile
-   data according to these looser rules, however, and roundtrip-
-   translation is unlikely to be guaranteed as this was a non-goal of
-   the original design.
+   looser norms set out in [RFC8949].  A CBOR-42 application or encoder
+   has no obligation to support re-encoding of such non-profile data
+   according to these looser rules, however, and roundtrip-translation
+   is unlikely to be guaranteed as this was a non-goal of the original
+   design.
 
 Acknowledgments
 
@@ -1081,13 +885,23 @@ Acknowledgments
 
    *  Carsten Bormann
 
+   *  David Buchanan
+
+   *  Cole Capilongo
+
    *  Paul Hoffman
 
    *  Dirk Kutscher
 
    *  Volker Mische
 
+   *  Wolf McNally
+
+   *  Bryan Newbold
+
    *  Marcin Rataj
+
+   *  Anders Rundgren
 
    *  Rod Vagg
 
