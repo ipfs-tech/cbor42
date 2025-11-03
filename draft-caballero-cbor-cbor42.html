@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta content="Common,Latin" name="scripts">
 <meta content="initial-scale=1.0" name="viewport">
-<title>The tag-42 profile of CBOR Core</title>
+<title>The tag-42 profile of CBOR</title>
 <meta content="Juan Caballero" name="author">
 <meta content="Robin Berjon" name="author">
 <meta content='
@@ -14,28 +14,26 @@ Since CBOR/c-42 objects link to one another by hash-based identifiers, determini
        This document mainly targets CBOR tool developers and those downstream users who would like to precisely configure their tools.
 While full support in CBOR tools would be ideal and is already possible in some highly configurable parsing libraries, ALDRs can help close the delta by sidestepping the biggest interoperability stumbling blocks; see Appendix C for details. 
     ' name="description">
-<meta content="xml2rfc 3.28.1" name="generator">
+<meta content="xml2rfc 3.31.0" name="generator">
 <meta content="CBOR" name="keyword">
-<meta content="CBOR/c" name="keyword">
 <meta content="deterministic encoding" name="keyword">
 <meta content="sparkling distributed ledger" name="keyword">
-<meta content="draft-caballero-cbor-cborc42-latest" name="ietf.draft">
+<meta content="draft-caballero-cbor-cbor42-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.28.1
-    Python 3.12.10
+  xml2rfc 3.31.0
+    Python 3.12.12
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.1.0
     Jinja2 3.1.6
-    lxml 5.3.0
-    platformdirs 4.3.8
+    lxml 5.3.1
+    platformdirs 4.5.0
     pycountry 24.6.1
     PyYAML 6.0.2
-    requests 2.32.3
-    setuptools 70.3.0
-    wcwidth 0.2.13
+    requests 2.32.5
+    wcwidth 0.2.14
 -->
-<link href="draft-caballero-cbor-cborc42.xml" rel="alternate" type="application/rfc+xml">
+<link href="draft-caballero-cbor-cbor42.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
 <style type="text/css">@font-face {
   font-family: 'Lora';
@@ -1051,12 +1049,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <table class="ears">
 <thead><tr>
 <td class="left">Internet-Draft</td>
-<td class="center">CBOR/c-42</td>
-<td class="right">May 2025</td>
+<td class="center">CBOR42</td>
+<td class="right">November 2025</td>
 </tr></thead>
 <tfoot><tr>
 <td class="left">Caballero &amp; Berjon</td>
-<td class="center">Expires 28 November 2025</td>
+<td class="center">Expires 7 May 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1066,15 +1064,15 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dt class="label-workgroup">Workgroup:</dt>
 <dd class="workgroup">Concise Binary Object Representation Maintenance and Extensions</dd>
 <dt class="label-internet-draft">Internet-Draft:</dt>
-<dd class="internet-draft">draft-caballero-cbor-cborc42-latest</dd>
+<dd class="internet-draft">draft-caballero-cbor-cbor42-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-05-27" class="published">27 May 2025</time>
+<time datetime="2025-11-03" class="published">3 November 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2025-11-28">28 November 2025</time></dd>
+<dd class="expires"><time datetime="2026-05-07">7 May 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1088,7 +1086,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </dd>
 </dl>
 </div>
-<h1 id="title">The tag-42 profile of CBOR Core</h1>
+<h1 id="title">The tag-42 profile of CBOR</h1>
 <section id="section-abstract">
       <h2 id="abstract"><a href="#abstract" class="selfRef">Abstract</a></h2>
 <p id="section-abstract-1">This document defines a strict profile of CBOR Core (CBOR/c) intended for use with the special tag 42.
@@ -1104,7 +1102,7 @@ While full support in CBOR tools would be ideal and is already possible in some 
 <p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
 <p id="section-note.1-2">
         The latest revision of this draft can be found at <span><a href="https://ipfs-tech.github.io/cborc42/draft-caballero-cbor-cborc42.html">https://ipfs-tech.github.io/cborc42/draft-caballero-cbor-cborc42.html</a></span>.
-        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-caballero-cbor-cborc42/">https://datatracker.ietf.org/doc/draft-caballero-cbor-cborc42/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
+        Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-caballero-cbor-cbor42/">https://datatracker.ietf.org/doc/draft-caballero-cbor-cbor42/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
 <p id="section-note.1-3">
         Discussion of this document takes place on the
         Concise Binary Object Representation Maintenance and Extensions  mailing list (<span><a href="mailto:cbor@ietf.org">mailto:cbor@ietf.org</a></span>),
@@ -1132,7 +1130,7 @@ While full support in CBOR tools would be ideal and is already possible in some 
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 28 November 2025.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 7 May 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1194,10 +1192,7 @@ While full support in CBOR tools would be ideal and is already possible in some 
                     <p id="section-toc.1-1.2.2.3.2.2.1"><a href="#section-2.3.2" class="auto internal xref">2.3.2</a>.  <a href="#name-media-type" class="internal xref">Media Type</a></p>
 </li>
                   <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3.2.3">
-                    <p id="section-toc.1-1.2.2.3.2.3.1"><a href="#section-2.3.3" class="auto internal xref">2.3.3</a>.  <a href="#name-diagnostic-notation" class="internal xref">Diagnostic Notation</a></p>
-</li>
-                  <li class="compact toc ulBare ulEmpty" id="section-toc.1-1.2.2.3.2.4">
-                    <p id="section-toc.1-1.2.2.3.2.4.1"><a href="#section-2.3.4" class="auto internal xref">2.3.4</a>.  <a href="#name-cbor-sequences" class="internal xref">CBOR Sequences</a></p>
+                    <p id="section-toc.1-1.2.2.3.2.3.1"><a href="#section-2.3.3" class="auto internal xref">2.3.3</a>.  <a href="#name-cbor-sequences" class="internal xref">CBOR Sequences</a></p>
 </li>
                 </ul>
 </li>
@@ -1319,7 +1314,7 @@ appear in all capitals, as shown here.<a href="#section-1.2-1" class="pilcrow">�
       <h2 id="name-specification">
 <a href="#section-2" class="section-number selfRef">2. </a><a href="#name-specification" class="section-name selfRef">Specification</a>
       </h2>
-<p id="section-2-1">This section describes how CBOR/c-42 subsets CBOR and differs from a standard CDE encoding.<a href="#section-2-1" class="pilcrow">¶</a></p>
+<p id="section-2-1">This section describes how CBOR-42 subsets CBOR and differs from a standard CDE encoding.<a href="#section-2-1" class="pilcrow">¶</a></p>
 <div id="supported-cbor-objects">
 <section id="section-2.1">
         <h3 id="name-supported-cbor-objects">
@@ -1337,10 +1332,6 @@ appear in all capitals, as shown here.<a href="#section-1.2-1" class="pilcrow">�
             <tr>
               <td class="text-left" rowspan="1" colspan="1">int</td>
               <td class="text-left" rowspan="1" colspan="1">Integer</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">bigint</td>
-              <td class="text-left" rowspan="1" colspan="1">Big integer</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">float</td>
@@ -1390,7 +1381,7 @@ appear in all capitals, as shown here.<a href="#section-1.2-1" class="pilcrow">�
             <p id="section-2.2-2.1.1">RFC+: Floating-point and integer objects <span class="bcp14">MUST</span> be treated as distinct types regardless of their numeric value. This is compliant with Rule 2 in Section 4.2.2 of <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>.<a href="#section-2.2-2.1.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-2.2-2.2">
-            <p id="section-2.2-2.2.1">RFC: Integers, represented by the int and bigint types, <span class="bcp14">MUST</span> use the int type if the value is between -2^64 and 2^64-1, otherwise the bigint type <span class="bcp14">MUST</span> be used.<a href="#section-2.2-2.2.1" class="pilcrow">¶</a></p>
+            <p id="section-2.2-2.2.1">RFC: Integers, represented by the int and bigint types, <span class="bcp14">MUST</span> use the int type if the value is between -2^64 and 2^64-1; otherwise, as with timestamp data, they must be encoded at higher layers, whether as bytestrings or strings.<a href="#section-2.2-2.2.1" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-2.2-2.2.2.1">
                 <p id="section-2.2-2.2.2.1.1">Appendix B.1 features a list of integer sample values and their expected encoding.<a href="#section-2.2-2.2.2.1.1" class="pilcrow">¶</a></p>
@@ -1407,7 +1398,7 @@ appear in all capitals, as shown here.<a href="#section-1.2-1" class="pilcrow">�
             <p id="section-2.2-2.5.1">RCF+: UNLIKE CBOR/c and standard CDE encoding, map keys <span class="bcp14">MUST</span> be typed as strings; no other types are allowed as map keys.<a href="#section-2.2-2.5.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-2.2-2.6">
-            <p id="section-2.2-2.6.1">RFC: Map keys <span class="bcp14">MUST</span> be sorted in the bytewise lexicographic order of their deterministic encoding. Duplicate keys (i.e. keys with identical determinstic bytestring values) <span class="bcp14">MUST</span> be rejected; note that semantic equivalence is not tested. As per the "Canonical CBOR" section (3.9) in <span>[<a href="#RFC7049" class="cite xref">RFC7049</a>]</span>, the following represents a properly sorted map:
+            <p id="section-2.2-2.6.1">RFC: Map keys <span class="bcp14">MUST</span> be sorted in the bytewise lexicographic order of their deterministic encoding. Duplicate keys (i.e. keys with identical deterministic bytestring values) <span class="bcp14">MUST</span> be rejected; note that semantic equivalence is not tested. As per the "Canonical CBOR" section (3.9) in <span>[<a href="#RFC7049" class="cite xref">RFC7049</a>]</span>, the following represents a properly sorted map:
 {
 "a": ... ,
 "b": ... ,
@@ -1428,8 +1419,7 @@ appear in all capitals, as shown here.<a href="#section-1.2-1" class="pilcrow">�
         <h3 id="name-cbor-tool-requirements">
 <a href="#section-2.3" class="section-number selfRef">2.3. </a><a href="#name-cbor-tool-requirements" class="section-name selfRef">CBOR Tool Requirements</a>
         </h3>
-<p id="section-2.3-1">As is the case with CBOR/c, CBOR/c-42 is also designed to allow hashing and signing in raw form.
-Because of the reduced range of types and tags, many of the tooling requirements made of CBOR/c are not necessary with CBOR/c-42; what follows is an edited version of the requirements proposed by Rundgren's current draft.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
+<p id="section-2.3-1">CBOR-42 is designed to allow hashing and signing in raw form.<a href="#section-2.3-1" class="pilcrow">¶</a></p>
 <p id="section-2.3-2">To make "raw" signing safe and verification of such signatures practical, CBOR tooling capable of the following is required:<a href="#section-2.3-2" class="pilcrow">¶</a></p>
 <ul class="normal">
 <li class="normal" id="section-2.3-3.1">
@@ -1453,7 +1443,7 @@ Because of the reduced range of types and tags, many of the tooling requirements
           <h4 id="name-protocol-primitives">
 <a href="#section-2.3.1" class="section-number selfRef">2.3.1. </a><a href="#name-protocol-primitives" class="section-name selfRef">Protocol Primitives</a>
           </h4>
-<p id="section-2.3.1-1">To facilitate cross-platform protocol interoperability, implementers of CBOR/c-42 compatible tools <span class="bcp14">SHOULD</span> include decoder API support for the following primitives.<a href="#section-2.3.1-1" class="pilcrow">¶</a></p>
+<p id="section-2.3.1-1">To facilitate cross-platform protocol interoperability, implementers of CBOR-42 compatible tools <span class="bcp14">SHOULD</span> include decoder API support for the following primitives.<a href="#section-2.3.1-1" class="pilcrow">¶</a></p>
 <table class="center" id="table-2">
             <caption><a href="#table-2" class="selfRef">Table 2</a></caption>
 <thead>
@@ -1514,12 +1504,6 @@ Because of the reduced range of types and tags, many of the tooling requirements
                 <td class="text-left" rowspan="1" colspan="1">1</td>
               </tr>
               <tr>
-                <td class="text-left" rowspan="1" colspan="1">integer</td>
-                <td class="text-left" rowspan="1" colspan="1">BigInt</td>
-                <td class="text-left" rowspan="1" colspan="1">Integer of arbitrary size</td>
-                <td class="text-left" rowspan="1" colspan="1">2</td>
-              </tr>
-              <tr>
                 <td class="text-left" rowspan="1" colspan="1">float</td>
                 <td class="text-left" rowspan="1" colspan="1">Float64</td>
                 <td class="text-left" rowspan="1" colspan="1">64-bit floating-point number</td>
@@ -1535,13 +1519,13 @@ Because of the reduced range of types and tags, many of the tooling requirements
                 <td class="text-left" rowspan="1" colspan="1">null</td>
                 <td class="text-left" rowspan="1" colspan="1">Null</td>
                 <td class="text-left" rowspan="1" colspan="1">Null</td>
-                <td class="text-left" rowspan="1" colspan="1">4</td>
+                <td class="text-left" rowspan="1" colspan="1">2</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">#7.nnn</td>
                 <td class="text-left" rowspan="1" colspan="1">Simple</td>
                 <td class="text-left" rowspan="1" colspan="1">ONLY null, false, true</td>
-                <td class="text-left" rowspan="1" colspan="1">5</td>
+                <td class="text-left" rowspan="1" colspan="1">3</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">tstr</td>
@@ -1559,13 +1543,13 @@ Because of the reduced range of types and tags, many of the tooling requirements
                 <td class="text-left" rowspan="1" colspan="1">See note</td>
                 <td class="text-left" rowspan="1" colspan="1">EpochTime</td>
                 <td class="text-left" rowspan="1" colspan="1">Time object expressed as a number</td>
-                <td class="text-left" rowspan="1" colspan="1">6</td>
+                <td class="text-left" rowspan="1" colspan="1">4</td>
               </tr>
               <tr>
                 <td class="text-left" rowspan="1" colspan="1">See note</td>
                 <td class="text-left" rowspan="1" colspan="1">DateTime</td>
                 <td class="text-left" rowspan="1" colspan="1">Time object expressed as a text string</td>
-                <td class="text-left" rowspan="1" colspan="1">6</td>
+                <td class="text-left" rowspan="1" colspan="1">4</td>
               </tr>
             </tbody>
           </table>
@@ -1574,24 +1558,16 @@ Because of the reduced range of types and tags, many of the tooling requirements
               <p id="section-2.3.1-3.1.1">Range testing <span class="bcp14">MUST</span> be performed using the traditional ranges for unsigned respectively two-complement numbers. That is, a hypothetical getUint8() <span class="bcp14">MUST</span> reject numbers outside of 0 to 255, whereas a hypothetical getInt8(), <span class="bcp14">MUST</span> reject numbers outside of -128 to 127.<a href="#section-2.3.1-3.1.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-2.3.1-3.2">
-              <p id="section-2.3.1-3.2.1">Note that a hypothetical getBigInt() <span class="bcp14">MUST</span> also accept CBOR int objects since int is used for integers that fit in CBOR major type 0 and 1 objects. See also Appendix B.1 and Appendix D.<a href="#section-2.3.1-3.2.1" class="pilcrow">¶</a></p>
+              <p id="section-2.3.1-3.2.1">Since a CBOR null typically represents the absence of a value, a decoder <span class="bcp14">MUST</span> provide a test-function, like isNull().<a href="#section-2.3.1-3.2.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-2.3.1-3.3">
-              <p id="section-2.3.1-3.3.1">Some platforms do not natively support float32 and/or float16. In this case a hypothetical getFloat16() would need to use a bigger floating-point type for the return value. Note that a hypothetical getFloat16() <span class="bcp14">MUST</span> reject encountered Float32 and Float64 objects. See also Appendix C.<a href="#section-2.3.1-3.3.1" class="pilcrow">¶</a></p>
+              <p id="section-2.3.1-3.3.1">Simple values in CBOR and CBOR/c include the ranges 0-23 and 32-255, all but three of which are invalid in CBOR-42; however, the capability to refer to boolean values (i.e. <code>true</code> and <code>false</code>) and <code>null</code> as major-type 7 simple values <span class="bcp14">MUST</span> be supported to guarantee interoperability with CBOR tooling generally.<a href="#section-2.3.1-3.3.1" class="pilcrow">¶</a></p>
 </li>
             <li id="section-2.3.1-3.4">
-              <p id="section-2.3.1-3.4.1">Since a CBOR null typically represents the absence of a value, a decoder <span class="bcp14">MUST</span> provide a test-function, like isNull().<a href="#section-2.3.1-3.4.1" class="pilcrow">¶</a></p>
-</li>
-            <li id="section-2.3.1-3.5">
-              <p id="section-2.3.1-3.5.1">Simple values in CBOR and CBOR/c include the ranges 0-23 and 32-255, all but three of which are invalid in CBOR/c-42; however, the capability to refer to boolean values (i.e. <code>true</code> and <code>false</code>) and <code>null</code> as major-type 7 simple values <span class="bcp14">MUST</span> be supported to guarantee interoperability with CBOR tooling generally.<a href="#section-2.3.1-3.5.1" class="pilcrow">¶</a></p>
-</li>
-            <li id="section-2.3.1-3.6">
-              <p id="section-2.3.1-3.6.1">Since CBOR lacks a native-level time object, Section 3.4 of <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span> introduces two variants of time objects using the CBOR tags 0 and 1, neither of which are supported by the CBOR/c-42 data model for historical interoperability reasons. To support time encoding stably, it is <span class="bcp14">RECOMMENDED</span> that EpochTime and/or DateTime types in input be force-typed as strings at the application level or at the ALDR level. Interoperability with other tooling may be difficult to achieve if support for these APIs is desired, and validating dates at higher layers may introduce new security issues at higher layers.<a href="#section-2.3.1-3.6.1" class="pilcrow">¶</a></p>
+              <p id="section-2.3.1-3.4.1">Since CBOR lacks a native-level time object, Section 3.4 of <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span> introduces two variants of time objects using the CBOR tags 0 and 1, neither of which are supported by the CBOR/c-42 data model for historical interoperability reasons. To support time encoding stably, it is <span class="bcp14">RECOMMENDED</span> that EpochTime and/or DateTime types in input be force-typed as strings at the application level or at the ALDR level. Interoperability with other tooling may be difficult to achieve if support for these APIs is desired, and validating dates at higher layers may introduce new security issues at higher layers.<a href="#section-2.3.1-3.4.1" class="pilcrow">¶</a></p>
 </li>
           </ol>
-<p id="section-2.3.1-4">(Note that the preceding is a strict subset of the protocol primitives enumerated by CBOR/c.)<a href="#section-2.3.1-4" class="pilcrow">¶</a></p>
-<p id="section-2.3.1-5">If a call does not match the underlying CBOR type, the call <span class="bcp14">MUST</span> be rejected.<a href="#section-2.3.1-5" class="pilcrow">¶</a></p>
-<p id="section-2.3.1-6">Due to considerable variations between platforms, corresponding encoder API support does not appear to be meaningful to specify in detail: Java doesn't have built-in support for unsigned integers, whereas JavaScript requires the use of the JavaScript BigInt type for dealing with 64-bit integers, etc.<a href="#section-2.3.1-6" class="pilcrow">¶</a></p>
+<p id="section-2.3.1-4">If a call does not match the underlying CBOR type, the call <span class="bcp14">MUST</span> be rejected.<a href="#section-2.3.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="media-type">
@@ -1599,164 +1575,16 @@ Because of the reduced range of types and tags, many of the tooling requirements
           <h4 id="name-media-type">
 <a href="#section-2.3.2" class="section-number selfRef">2.3.2. </a><a href="#name-media-type" class="section-name selfRef">Media Type</a>
           </h4>
-<p id="section-2.3.2-1">Protocols transmitting CBOR/c-42 over HTTP interfaces are <span class="bcp14">RECOMMENDED</span> to send all CBOR/c-42 data with a media type header of <code>application/cbor</code>.<a href="#section-2.3.2-1" class="pilcrow">¶</a></p>
-</section>
-</div>
-<div id="diagnostic-notation">
-<section id="section-2.3.3">
-          <h4 id="name-diagnostic-notation">
-<a href="#section-2.3.3" class="section-number selfRef">2.3.3. </a><a href="#name-diagnostic-notation" class="section-name selfRef">Diagnostic Notation</a>
-          </h4>
-<p id="section-2.3.3-1">Compliant CBOR/c implementations <span class="bcp14">SHOULD</span> include support for bi-directional diagnostic notation, to facilitate:<a href="#section-2.3.3-1" class="pilcrow">¶</a></p>
-<ul class="normal">
-<li class="normal" id="section-2.3.3-2.1">
-              <p id="section-2.3.3-2.1.1">Generation of developer-friendly debugging and logging data<a href="#section-2.3.3-2.1.1" class="pilcrow">¶</a></p>
-</li>
-            <li class="normal" id="section-2.3.3-2.2">
-              <p id="section-2.3.3-2.2.1">Easy creation of test and configuration data<a href="#section-2.3.3-2.2.1" class="pilcrow">¶</a></p>
-</li>
-          </ul>
-<p id="section-2.3.3-3">Note that decoders for diagnostic notation, <span class="bcp14">MUST</span> always produce deterministically encoded CBOR data, compliant with this specification. This includes automatic sorting of map keys as well.<a href="#section-2.3.3-3" class="pilcrow">¶</a></p>
-<p id="section-2.3.3-4">The supported notation is compliant with a subset of Section 8 of <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span> (b32' and encoding indicators were left out), but adds a few items to make diagnostic notation slightly more adapted for parsing, like single-line comments:<a href="#section-2.3.3-4" class="pilcrow">¶</a></p>
-<table class="center" id="table-3">
-            <caption><a href="#table-3" class="selfRef">Table 3</a></caption>
-<thead>
-              <tr>
-                <th class="text-left" rowspan="1" colspan="1">CBOR</th>
-                <th class="text-left" rowspan="1" colspan="1">Syntax</th>
-                <th class="text-left" rowspan="1" colspan="1">Comment</th>
-                <th class="text-left" rowspan="1" colspan="1">Notes</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">/ comment text /</td>
-                <td class="text-left" rowspan="1" colspan="1">Multi-line comment. Multi-line comments are treated as whitespace and may thus also be used between CBOR objects.</td>
-                <td class="text-left" rowspan="1" colspan="1">6</td>
-                <td class="text-left" rowspan="1" colspan="1"> </td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1"># comment text</td>
-                <td class="text-left" rowspan="1" colspan="1">Single-line comment. Single-line comments are terminated by a newline character ('\n') or EOF. Single-line comments may also terminate lines holding regular CBOR items.</td>
-                <td class="text-left" rowspan="1" colspan="1">6</td>
-                <td class="text-left" rowspan="1" colspan="1"> </td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">integer</td>
-                <td class="text-left" rowspan="1" colspan="1">{sign} { 0b|0o|0x} n</td>
-                <td class="text-left" rowspan="1" colspan="1">Arbitrary sized integers without fractional components or exponents. See also CBOR integer encoding. For input data in diagnostic notation, binary, octal, and hexadecimal notation is also supported by prepending numbers with 0b, 0o, and 0x respectively. The latter also permit arbitrary insertions of '_' characters between digits to enable grouping of data like 0b100_000000001.</td>
-                <td class="text-left" rowspan="1" colspan="1">1, 2</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">float</td>
-                <td class="text-left" rowspan="1" colspan="1">{sign} n.n { e±n }</td>
-                <td class="text-left" rowspan="1" colspan="1">Floating point values <span class="bcp14">MUST</span> include a decimal point and at least one fractional digit, whereas exponents are optional.</td>
-                <td class="text-left" rowspan="1" colspan="1">1, 2</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">float</td>
-                <td class="text-left" rowspan="1" colspan="1">NaN</td>
-                <td class="text-left" rowspan="1" colspan="1">Not a number.</td>
-                <td class="text-left" rowspan="1" colspan="1"> </td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">float</td>
-                <td class="text-left" rowspan="1" colspan="1">{sign} Infinity</td>
-                <td class="text-left" rowspan="1" colspan="1">Infinity.</td>
-                <td class="text-left" rowspan="1" colspan="1">2</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">bstr</td>
-                <td class="text-left" rowspan="1" colspan="1">h'hex-data'</td>
-                <td class="text-left" rowspan="1" colspan="1">Byte data provided in hexadecimal notation. Each byte <span class="bcp14">MUST</span> be represented by two hexadecimal digits.</td>
-                <td class="text-left" rowspan="1" colspan="1">3</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">bstr</td>
-                <td class="text-left" rowspan="1" colspan="1">b64'base64-data'</td>
-                <td class="text-left" rowspan="1" colspan="1">Byte data provided in base64 or base64URL notation. Padding with '=' characters is optional.</td>
-                <td class="text-left" rowspan="1" colspan="1">3, 6</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">bstr</td>
-                <td class="text-left" rowspan="1" colspan="1">'text'</td>
-                <td class="text-left" rowspan="1" colspan="1">Byte data provided as UTF-8 encoded text.</td>
-                <td class="text-left" rowspan="1" colspan="1">4, 5, 6</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">bstr</td>
-                <td class="text-left" rowspan="1" colspan="1">&lt;&lt; object... &gt;&gt;</td>
-                <td class="text-left" rowspan="1" colspan="1">Construct holding zero or more comma-separated CBOR objects that are subsequently wrapped in a byte string.</td>
-                <td class="text-left" rowspan="1" colspan="1">6</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">tstr</td>
-                <td class="text-left" rowspan="1" colspan="1">"text"</td>
-                <td class="text-left" rowspan="1" colspan="1">UTF-8 encoded text string.</td>
-                <td class="text-left" rowspan="1" colspan="1">4, 5</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">bool</td>
-                <td class="text-left" rowspan="1" colspan="1">true | false</td>
-                <td class="text-left" rowspan="1" colspan="1">Boolean value.</td>
-                <td class="text-left" rowspan="1" colspan="1"> </td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">null</td>
-                <td class="text-left" rowspan="1" colspan="1">null</td>
-                <td class="text-left" rowspan="1" colspan="1">Null value.</td>
-                <td class="text-left" rowspan="1" colspan="1"> </td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">[]</td>
-                <td class="text-left" rowspan="1" colspan="1">[ object... ]</td>
-                <td class="text-left" rowspan="1" colspan="1">Array with zero or more comma-separated CBOR objects.</td>
-                <td class="text-left" rowspan="1" colspan="1"> </td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">{}</td>
-                <td class="text-left" rowspan="1" colspan="1">{ key:value... }</td>
-                <td class="text-left" rowspan="1" colspan="1">Map with zero or more comma-separated key/value pairs. Key and value pairs are expressed as CBOR objects, separated by a ':' character.</td>
-                <td class="text-left" rowspan="1" colspan="1"> </td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">#6.nnn</td>
-                <td class="text-left" rowspan="1" colspan="1">n ( object )</td>
-                <td class="text-left" rowspan="1" colspan="1">Tag holding a CBOR object.</td>
-                <td class="text-left" rowspan="1" colspan="1">1</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">#7.nnn</td>
-                <td class="text-left" rowspan="1" colspan="1">simple(n)</td>
-                <td class="text-left" rowspan="1" colspan="1">Simple value.</td>
-                <td class="text-left" rowspan="1" colspan="1">1</td>
-              </tr>
-              <tr>
-                <td class="text-left" rowspan="1" colspan="1">,</td>
-                <td class="text-left" rowspan="1" colspan="1">Separator character for CBOR sequences.</td>
-                <td class="text-left" rowspan="1" colspan="1">6</td>
-                <td class="text-left" rowspan="1" colspan="1"> </td>
-              </tr>
-            </tbody>
-          </table>
-<p id="section-2.3.3-6">The letter n in the Syntax column denotes one or more digits.
-The optional {sign} <span class="bcp14">MUST</span> be a single hyphen ('-') character.
-Input only: between the quotes, the whitespace characters (' ', '\t', '\r', '\n') are ignored.
-Input only: the control characters '\t' and '\n' inside of string quotes become a part of the text. For normalizing line terminators, a single '\r' or the combination '\r\n' <span class="bcp14">MUST</span> (internally) be rewritten as '\n'. To avoid getting newline characters ('\n') included in multi-line text strings, a line continuation marker consisting of a backslash ('') immediately preceding the newline may be used.
-Text strings may also include JavaScript compatible escape sequences (''', '"', '\', '\b', '\f', '\n', '\r', '\t', '\uhhhh').
-Input only.
-The <span>[<a href="#PLAYGROUND" class="cite xref">PLAYGROUND</a>]</span> is an excellent way of getting acquainted with CBOR and diagnostic notation.<a href="#section-2.3.3-6" class="pilcrow">¶</a></p>
+<p id="section-2.3.2-1">Protocols transmitting CBOR-42 over HTTP interfaces are <span class="bcp14">RECOMMENDED</span> to send all CBOR-42 data with a media type header of <code>application/cbor</code>.<a href="#section-2.3.2-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="cbor-sequences">
-<section id="section-2.3.4">
+<section id="section-2.3.3">
           <h4 id="name-cbor-sequences">
-<a href="#section-2.3.4" class="section-number selfRef">2.3.4. </a><a href="#name-cbor-sequences" class="section-name selfRef">CBOR Sequences</a>
+<a href="#section-2.3.3" class="section-number selfRef">2.3.3. </a><a href="#name-cbor-sequences" class="section-name selfRef">CBOR Sequences</a>
           </h4>
-<p id="section-2.3.4-1">Decoders compliant with this specification <span class="bcp14">MUST</span> support CBOR sequences <span>[<a href="#RFC8742" class="cite xref">RFC8742</a>]</span>.<a href="#section-2.3.4-1" class="pilcrow">¶</a></p>
-<p id="section-2.3.4-2">For decoders of "true" (binary) CBOR, there are additional requirements:<a href="#section-2.3.4-2" class="pilcrow">¶</a></p>
-<p id="section-2.3.4-3">It <span class="bcp14">MUST</span> be possible to decode one CBOR object at a time.
-The decoder <span class="bcp14">MUST NOT</span> make any assumptions about the nature of unread code (it might not even be CBOR).<a href="#section-2.3.4-3" class="pilcrow">¶</a></p>
+<p id="section-2.3.3-1">Concatenating or streaming CBOR objects is strongly discouraged except in contexts where the <code>application/cbor-seq</code> media type can be used to set decoder expectations appropriately.
+See <span>[<a href="#RFC8742" class="cite xref">RFC8742</a>]</span> for guidance on streaming best practices.<a href="#section-2.3.3-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 </section>
@@ -1768,7 +1596,7 @@ The decoder <span class="bcp14">MUST NOT</span> make any assumptions about the n
       <h2 id="name-security-considerations">
 <a href="#section-3" class="section-number selfRef">3. </a><a href="#name-security-considerations" class="section-name selfRef">Security Considerations</a>
       </h2>
-<p id="section-3-1">It is assumed that CBOR/c-42 has no novel security issues compared to CBOR Deterministic Encoding as defined in <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span> but the authors would appreciate any hypotheses or evidence to the contrary.<a href="#section-3-1" class="pilcrow">¶</a></p>
+<p id="section-3-1">It is assumed that CBOR-42 has no novel security issues compared to CBOR Deterministic Encoding as defined in <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span> but the authors would appreciate any hypotheses or evidence to the contrary.<a href="#section-3-1" class="pilcrow">¶</a></p>
 <p id="section-3-2">It should be noted that there has been to date little implementer feedback on the ALDR suggestions outlined in the appendices.
 As such, these should be considered as an understudied security surface for the application layer to consider.<a href="#section-3-2" class="pilcrow">¶</a></p>
 </section>
@@ -1778,7 +1606,7 @@ As such, these should be considered as an understudied security surface for the 
       <h2 id="name-iana-considerations">
 <a href="#section-4" class="section-number selfRef">4. </a><a href="#name-iana-considerations" class="section-name selfRef">IANA Considerations</a>
       </h2>
-<p id="section-4-1">This document has no IANA actions.<a href="#section-4-1" class="pilcrow">¶</a></p>
+<p id="section-4-1">This document requests no IANA actions.<a href="#section-4-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="sec-combined-references">
@@ -1841,10 +1669,6 @@ As such, these should be considered as an understudied security surface for the 
         <dd>
 <span class="refTitle">"Multiformats Community Registry"</span>, <span>n.d.</span>, <span>&lt;<a href="https://github.com/multiformats/multicodec/">https://github.com/multiformats/multicodec/</a>&gt;</span>. </dd>
 <dd class="break"></dd>
-<dt id="PLAYGROUND">[PLAYGROUND]</dt>
-        <dd>
-<span class="refTitle">"Online CBOR testing tool"</span>, <span>n.d.</span>, <span>&lt;<a href="https://cyberphone.github.io/CBOR.js/doc/playground.html">https://cyberphone.github.io/CBOR.js/doc/playground.html</a>&gt;</span>. </dd>
-<dd class="break"></dd>
 <dt id="protobuf">[protobuf]</dt>
         <dd>
 <span class="refTitle">"Encoding rules and MIME type for Protocol Buffers"</span>, <time datetime="2012" class="refDate">2012</time>, <span>&lt;<a href="https://www.ietf.org/archive/id/draft-rfernando-protocol-buffers-00.txt">https://www.ietf.org/archive/id/draft-rfernando-protocol-buffers-00.txt</a>&gt;</span>. </dd>
@@ -1871,9 +1695,9 @@ As such, these should be considered as an understudied security surface for the 
       <h2 id="name-binary-content-identifiers">
 <a href="#appendix-A" class="section-number selfRef">Appendix A. </a><a href="#name-binary-content-identifiers" class="section-name selfRef">Binary Content Identifiers</a>
       </h2>
-<p id="appendix-A-1">A simple hash-based "content identifier" is used to link documents in the graph for which CBOR/c-42 was designed, and tag 42 was registered specifically for those link identifiers in the IANA registry, "Concise Binary Object Representation (CBOR) Tags" created by <a href="https://datatracker.ietf.org/doc/html/rfc8949#section-9.2">Section 9.2</a> of <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
-<p id="appendix-A-2">Being able to navigate or generate new links in this graph are strictly unrelated concerns and of course optional for a CBOR/c-42 encoder and decoder, so this entire section is non-normative and provided informationally for the purposes of making less opaque the bytestrings marked by tag 42.
-Some CBOR/c-42 parsers may want to introspect the tag 42 values, if only to know which dereference to other CBOR/c-42 (or vanilla CBOR) documents.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
+<p id="appendix-A-1">A simple hash-based "content identifier" is used to link documents in the graph for which CBOR-42 was designed, and tag 42 was registered specifically for those link identifiers in the IANA registry, "Concise Binary Object Representation (CBOR) Tags" created by <a href="https://datatracker.ietf.org/doc/html/rfc8949#section-9.2">Section 9.2</a> of <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>.<a href="#appendix-A-1" class="pilcrow">¶</a></p>
+<p id="appendix-A-2">Being able to navigate or generate new links in this graph are strictly unrelated concerns and of course optional for a CBOR-42 encoder and decoder, so this entire section is provided informationally for the purposes of making less opaque the bytestrings marked by tag 42.
+Some CBOR-42 parsers may want to introspect the tag 42 values, if only to know which dereference to other CBOR-42 (or vanilla CBOR) documents.<a href="#appendix-A-2" class="pilcrow">¶</a></p>
 <p id="appendix-A-3">Note: this describes tag-42 values from the perspective of the CBOR documents in which they are embedded; a simpler, "application developer"-oriented overview of content identifiers can be found at <span>[<a href="#DASL.ING" class="cite xref">DASL.ING</a>]</span>.<a href="#appendix-A-3" class="pilcrow">¶</a></p>
 <p id="appendix-A-4">The format consists of a few sigils prepended to a hash of the linked document; there are many possible values for these sigils but these are like CBOR tags, extension points rather than required features of the system.
 All the sigils and the hash are of variable length, encoded as Self-Delimiting Numeric Values (<span>[<a href="#RFC6256" class="cite xref">RFC6256</a>]</span>).
@@ -1883,7 +1707,7 @@ The sequence of segments is as follows:<a href="#appendix-A-4" class="pilcrow">�
           <p id="appendix-A-5.1.1">Mandatory padding byte <code>0x00</code>. This is required for interoperability with non-CBOR CID systems and for historical reasons (see Legacy Support section below).<a href="#appendix-A-5.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="appendix-A-5.2">
-          <p id="appendix-A-5.2.1">Version byte: <code>0x01</code> is the only value worth attempting to parse in a general-purpose tool.  <code>0x00</code> refers to a legacy form explained below, with <code>0x02</code> and <code>0x03</code> reserved for potential future use.<a href="#appendix-A-5.2.1" class="pilcrow">¶</a></p>
+          <p id="appendix-A-5.2.1">Version byte: <code>0x01</code> is the only value to expect in a general-purpose tool.  <code>0x00</code> refers to a legacy form explained below, with <code>0x02</code> and <code>0x03</code> reserved for potential future use.<a href="#appendix-A-5.2.1" class="pilcrow">¶</a></p>
 </li>
         <li id="appendix-A-5.3">
           <p id="appendix-A-5.3.1">A contextualizing sigil roughly mapping to content types taken from a community registry called <span>[<a href="#MULTIFORMATS" class="cite xref">MULTIFORMATS</a>]</span>. The only values that all CBOR/c-42 decoders need to recognize are:<a href="#appendix-A-5.3.1" class="pilcrow">¶</a></p>
@@ -1939,8 +1763,8 @@ This is not best practice but can also serve as some explanation for the padding
         <h3 id="name-integers">
 <a href="#appendix-B.1" class="section-number selfRef">B.1. </a><a href="#name-integers" class="section-name selfRef">Integers</a>
         </h3>
-<table class="center" id="table-4">
-          <caption><a href="#table-4" class="selfRef">Table 4</a></caption>
+<table class="center" id="table-3">
+          <caption><a href="#table-3" class="selfRef">Table 3</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Diagnostic Notation</th>
@@ -2049,16 +1873,6 @@ This is not best practice but can also serve as some explanation for the padding
               <td class="text-left" rowspan="1" colspan="1">3bffffffffffffffff</td>
               <td class="text-left" rowspan="1" colspan="1">Largest negative eight-byte int</td>
             </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">18446744073709551616</td>
-              <td class="text-left" rowspan="1" colspan="1">c249010000000000000000</td>
-              <td class="text-left" rowspan="1" colspan="1">Smallest positive bigint</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">-18446744073709551617</td>
-              <td class="text-left" rowspan="1" colspan="1">c349010000000000000000</td>
-              <td class="text-left" rowspan="1" colspan="1">Smallest negative bigint</td>
-            </tr>
           </tbody>
         </table>
 </section>
@@ -2069,26 +1883,26 @@ This is not best practice but can also serve as some explanation for the padding
 <a href="#appendix-B.2" class="section-number selfRef">B.2. </a><a href="#name-floating-point-numbers" class="section-name selfRef">Floating Point Numbers</a>
         </h3>
 <p id="appendix-B.2-1">The textual representation of the values is based on the serialization method for the Number data type, defined by <span>[<a href="#ECMASCRIPT" class="cite xref">ECMASCRIPT</a>]</span> with one change: to comply with diagnostic notation (section 8 of <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>), all values are expressed as floating-point numbers. The rationale for using <span>[<a href="#ECMASCRIPT" class="cite xref">ECMASCRIPT</a>]</span> serialization is because it is supposed to generate the shortest and most correct representation of <span>[<a href="#IEEE754" class="cite xref">IEEE754</a>]</span> numbers.<a href="#appendix-B.2-1" class="pilcrow">¶</a></p>
-<table class="center" id="table-5">
-          <caption><a href="#table-5" class="selfRef">Table 5</a></caption>
+<table class="center" id="table-4">
+          <caption><a href="#table-4" class="selfRef">Table 4</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Diagnostic Notation</th>
-              <th class="text-left" rowspan="1" colspan="1">CBOR/c-42 Encoding</th>
-              <th class="text-left" rowspan="1" colspan="1">CBOR/c Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">CBOR-42 Encoding</th>
+              <th class="text-left" rowspan="1" colspan="1">CBOR Encoding</th>
               <th class="text-left" rowspan="1" colspan="1">Comment</th>
             </tr>
           </thead>
           <tbody>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0.0</td>
-              <td class="text-left" rowspan="1" colspan="1">?</td>
+              <td class="text-left" rowspan="1" colspan="1">f90000</td>
               <td class="text-left" rowspan="1" colspan="1">f90000</td>
               <td class="text-left" rowspan="1" colspan="1">Zero</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">-0.0</td>
-              <td class="text-left" rowspan="1" colspan="1">?</td>
+              <td class="text-left" rowspan="1" colspan="1">f98000</td>
               <td class="text-left" rowspan="1" colspan="1">f98000</td>
               <td class="text-left" rowspan="1" colspan="1">Negative zero</td>
             </tr>
@@ -2347,8 +2161,8 @@ This is not best practice but can also serve as some explanation for the padding
         <h3 id="name-miscellaneous-items">
 <a href="#appendix-B.3" class="section-number selfRef">B.3. </a><a href="#name-miscellaneous-items" class="section-name selfRef">Miscellaneous Items</a>
         </h3>
-<table class="center" id="table-6">
-          <caption><a href="#table-6" class="selfRef">Table 6</a></caption>
+<table class="center" id="table-5">
+          <caption><a href="#table-5" class="selfRef">Table 5</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">Diagnostic Notation</th>
@@ -2421,8 +2235,8 @@ This is not best practice but can also serve as some explanation for the padding
         <h3 id="name-invalid-encodings">
 <a href="#appendix-B.4" class="section-number selfRef">B.4. </a><a href="#name-invalid-encodings" class="section-name selfRef">Invalid Encodings</a>
         </h3>
-<table class="center" id="table-7">
-          <caption><a href="#table-7" class="selfRef">Table 7</a></caption>
+<table class="center" id="table-6">
+          <caption><a href="#table-6" class="selfRef">Table 6</a></caption>
 <thead>
             <tr>
               <th class="text-left" rowspan="1" colspan="1">CBOR Encoding</th>
@@ -2491,6 +2305,16 @@ This is not best practice but can also serve as some explanation for the padding
               <td class="text-left" rowspan="1" colspan="1"> </td>
               <td class="text-left" rowspan="1" colspan="1">Extremely large bstr length indicator: 4503599627370496</td>
             </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">18446744073709551616</td>
+              <td class="text-left" rowspan="1" colspan="1">c249010000000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest positive bigint</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">-18446744073709551617</td>
+              <td class="text-left" rowspan="1" colspan="1">c349010000000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">Smallest negative bigint</td>
+            </tr>
           </tbody>
         </table>
 </section>
@@ -2506,7 +2330,7 @@ This is not best practice but can also serve as some explanation for the padding
 This creates three major issues for CBOR parsers that are not highly configurable:<a href="#appendix-C-1" class="pilcrow">¶</a></p>
 <ol start="1" type="1" class="normal type-1" id="appendix-C-2">
 <li id="appendix-C-2.1">
-          <p id="appendix-C-2.1.1">The drastically reduced set of types and tags, as well as the requirement that map keys be typed as strings, usually require enformcement at the application layer, i.e. as "ALDR"s.<a href="#appendix-C-2.1.1" class="pilcrow">¶</a></p>
+          <p id="appendix-C-2.1.1">The drastically reduced set of types and tags, as well as the requirement that map keys be typed as strings, usually require enforcement at the application layer, i.e. as "ALDR"s.<a href="#appendix-C-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li id="appendix-C-2.2">
           <p id="appendix-C-2.2.1">Configuring a generic library to <em>encode</em> CBOR according to this profile's map-sorting requirement, when that library does not support <span>[<a href="#RFC7049" class="cite xref">RFC7049</a>]</span> Canonical-CBOR sort mode (sometimes called "legacy" or "lengthfirst"), can be a substantial burden, and may require implementing that sorting algorithm at the application layer if the parser allows preserving map order in input.<a href="#appendix-C-2.2.1" class="pilcrow">¶</a></p>
@@ -2523,7 +2347,7 @@ This creates three major issues for CBOR parsers that are not highly configurabl
 <a href="#appendix-D" class="section-number selfRef">Appendix D. </a><a href="#name-decoding-strictness" class="section-name selfRef">Decoding Strictness</a>
       </h2>
 <p id="appendix-D-1">When decoding CBOR data encoded without observing the rules defined above, it recommended that validity rules around allowed types and tags, integer reduction, float reduction, and map sorting follow the looser norms set out in <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>.
-A CBOR/c-42 application or encoder has no obligation to support re-encoding of such non-profile data according to these looser rules, however, and roundtrip-translation is unlikely to be guaranteed as this was a non-goal of the original design.<a href="#appendix-D-1" class="pilcrow">¶</a></p>
+A CBOR-42 application or encoder has no obligation to support re-encoding of such non-profile data according to these looser rules, however, and roundtrip-translation is unlikely to be guaranteed as this was a non-goal of the original design.<a href="#appendix-D-1" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="acknowledgments">
@@ -2537,19 +2361,34 @@ A CBOR/c-42 application or encoder has no obligation to support re-encoding of s
           <p id="appendix-E-2.1.1">Carsten Bormann<a href="#appendix-E-2.1.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-E-2.2">
-          <p id="appendix-E-2.2.1">Paul Hoffman<a href="#appendix-E-2.2.1" class="pilcrow">¶</a></p>
+          <p id="appendix-E-2.2.1">David Buchanan<a href="#appendix-E-2.2.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-E-2.3">
-          <p id="appendix-E-2.3.1">Dirk Kutscher<a href="#appendix-E-2.3.1" class="pilcrow">¶</a></p>
+          <p id="appendix-E-2.3.1">Cole Capilongo<a href="#appendix-E-2.3.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-E-2.4">
-          <p id="appendix-E-2.4.1">Volker Mische<a href="#appendix-E-2.4.1" class="pilcrow">¶</a></p>
+          <p id="appendix-E-2.4.1">Paul Hoffman<a href="#appendix-E-2.4.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-E-2.5">
-          <p id="appendix-E-2.5.1">Marcin Rataj<a href="#appendix-E-2.5.1" class="pilcrow">¶</a></p>
+          <p id="appendix-E-2.5.1">Dirk Kutscher<a href="#appendix-E-2.5.1" class="pilcrow">¶</a></p>
 </li>
         <li class="normal" id="appendix-E-2.6">
-          <p id="appendix-E-2.6.1">Rod Vagg<a href="#appendix-E-2.6.1" class="pilcrow">¶</a></p>
+          <p id="appendix-E-2.6.1">Volker Mische<a href="#appendix-E-2.6.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.7">
+          <p id="appendix-E-2.7.1">Wolf McNally<a href="#appendix-E-2.7.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.8">
+          <p id="appendix-E-2.8.1">Bryan Newbold<a href="#appendix-E-2.8.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.9">
+          <p id="appendix-E-2.9.1">Marcin Rataj<a href="#appendix-E-2.9.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.10">
+          <p id="appendix-E-2.10.1">Anders Rundgren<a href="#appendix-E-2.10.1" class="pilcrow">¶</a></p>
+</li>
+        <li class="normal" id="appendix-E-2.11">
+          <p id="appendix-E-2.11.1">Rod Vagg<a href="#appendix-E-2.11.1" class="pilcrow">¶</a></p>
 </li>
       </ul>
 </section>
