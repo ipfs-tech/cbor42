@@ -66,12 +66,11 @@ informative:
 
 --- abstract
 
-This document defines a strict profile of CBOR Core (CBOR/c) intended for use with the special tag 42.
-Like the CBOR Core it profiles, "CBOR/c-42" can also be used as an internet-scale serialization for JSON, and is optimized for objects that compose into a directed acyclical graph.
-Since CBOR/c-42 objects link to one another by hash-based identifiers, deterministic encoding is mandated to verify dereferenced links and encode new ones.
+This document defines a very narrow profile of CBOR intended for use with the special tag 42.
+Like the earlier internet-draft submitted under the name "CBOR Core," much of its design dates to the first CBOR RFC and predates much of the layered approach to determinism and profiling in later years.
 
-This document mainly targets CBOR tool developers and those downstream users who would like to precisely configure their tools.
-While full support in CBOR tools would be ideal and is already possible in some highly configurable parsing libraries, ALDRs can help close the delta by sidestepping the biggest interoperability stumbling blocks; see Appendix C for details.
+Also like "CBOR/c", CBOR-42 can be used as an internet-scale serialization for JSON, and is optimized for objects that compose into a directed acyclical graph.
+Since CBOR-42 objects link to one another by hash-based identifiers tagged "42", deterministic encoding is mandated to verify dereferenced links and encode new ones.
 
 --- middle
 
