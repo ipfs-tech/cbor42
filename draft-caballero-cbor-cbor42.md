@@ -1,9 +1,9 @@
 ---
 title: "The tag-42 profile of CBOR"
-abbrev: "CBOR-42"
+abbrev: "CBOR42"
 category: info
 
-docname: draft-caballero-cbor-cbor-42-latest
+docname: draft-caballero-cbor-cbor42-latest
 submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
@@ -20,8 +20,8 @@ venue:
   type: ""
   mail: "cbor@ietf.org"
   arch: "https://www.ietf.org/mail-archive/web/cbor/current/maillist.html"
-  github: "ipfs-tech/cbor42"
-  latest: "https://ipfs-tech.github.io/cborc42/draft-caballero-cbor-cbor42.html"
+  github: "ipfs-tech/cborc42"
+  latest: "https://ipfs-tech.github.io/cborc42/draft-caballero-cbor-cborc42.html"
 
 author:
  -
@@ -53,12 +53,9 @@ informative:
         name: Robin Berjon
       -
         name: Juan Caballero
-    date: 2025
+    date: 2024
     title: DASL Content Identifiers
     target: https://dasl.ing/cid.html
-  PLAYGROUND:
-    title: Online CBOR testing tool
-    target: https://cyberphone.github.io/CBOR.js/doc/playground.html
   protobuf:
     title: Encoding rules and MIME type for Protocol Buffers
     date: 2012
@@ -69,10 +66,9 @@ informative:
 
 --- abstract
 
-This document defines a very narrow profile of CBOR intended for use with the special tag 42.
-Like the earlier internet-draft submitted under the name "CBOR Core," much of its design dates to the first CBOR RFC and predates much of the layered approach to determinism and profiling in later years.
-Also like "CBOR/c", CBOR-42 can be used as an internet-scale serialization for JSON, and is optimized for objects that compose into a directed acyclical graph.
-Since CBOR-42 objects link to one another by hash-based identifiers tagged "42", deterministic encoding is mandated to verify dereferenced links and encode new ones.
+This document defines a strict profile of CBOR Core (CBOR/c) intended for use with the special tag 42.
+Like the CBOR Core it profiles, "CBOR/c-42" can also be used as an internet-scale serialization for JSON, and is optimized for objects that compose into a directed acyclical graph.
+Since CBOR/c-42 objects link to one another by hash-based identifiers, deterministic encoding is mandated to verify dereferenced links and encode new ones.
 
 This document mainly targets CBOR tool developers and those downstream users who would like to precisely configure their tools.
 While full support in CBOR tools would be ideal and is already possible in some highly configurable parsing libraries, ALDRs can help close the delta by sidestepping the biggest interoperability stumbling blocks; see Appendix C for details.
@@ -90,7 +86,7 @@ Note: unlike the CBOR/c specification, no opinion on best practices for hashing 
 
 The primary goal of this specification is enabling application developers to configure CBOR tooling for this profile, and for CBOR tooling to support such configuration, in as language-agnostic a way as possible.
 The historical design of this profile was to maximize determinism and simplicity for an internet-scale directed acyclical graph of CBOR documents linked to one another by binary hashes.
-These simple content identifiers, defined in Appendix A, are always expressed as bytestrings marked with tag 42 (similar in design to [RFC6920] Named Information Hashes).
+These simple content identifiers, defined in Appendix A, are always expressed as bytestrings of tag 42 (similar in design to [RFC6920] Named Information Hashes).
 All other tags, and many major and minor types, are forbidden to reduce ambiguity, and developers are encouraged to express many kinds of data at higher layers by using the supported types (such as strings or bytestrings).
 
 ## Requirements Language
@@ -102,6 +98,7 @@ All other tags, and many major and minor types, are forbidden to reduce ambiguit
 - This document uses the conventions defined in CDDL [RFC8610] for expressing the type of CBOR [RFC8949] data items.
 - Examples showing CBOR data, are expressed in "diagnostic notation" as defined in Section 8 of [RFC8949].
 - The term "CBOR object" is equivalent to "CBOR data item" used in [RFC8949].
+- The term "CBOR Core" is in this document abbreviated to "CBOR/c".
 
 # Specification
 
@@ -111,7 +108,7 @@ This section describes how CBOR-42 subsets CBOR and differs from a standard CDE 
 
 | CBOR | Comment |
 | --- | --- |
-| int | Integer (64-bit maximum) |
+| int | Integer |
 | float | 64-bit [IEEE754] numbers ONLY |
 | tstr | Text string encoded as UTF-8 [RFC3629] |
 | bstr | Byte string |
@@ -126,7 +123,8 @@ This section describes how CBOR-42 subsets CBOR and differs from a standard CDE 
 As in CBOR/c, deterministic encoding is mandatory. The encoding scheme adheres to Section 4.2 of [RFC8949], but adds a few constraints (denoted below by RFC+), where this RFC offers choices. The following list contains a summary of the deterministic encoding rules:
 
 - RFC+: Floating-point and integer objects MUST be treated as distinct types regardless of their numeric value. This is compliant with Rule 2 in Section 4.2.2 of [RFC8949].
-- RFC+: Integers, represented only by the int type, MUST use the int type if the value is between -2^64 and 2^64-1; otherwise, as with timestamp data, they must be encoded at higher layers, whether as bytestrings or strings.
+- RFC: Integers, represented by the int and bigint types, MUST use the int type if the value is between -2^64 and 2^64-1; otherwise, as with timestamp data, they must be encoded at higher layers, whether as bytestrings or strings.
+  - Appendix B.1 features a list of integer sample values and their expected encoding.
 - RFC+: UNLIKE CBOR/c and standard CDE encoding, floating-point numbers MUST always be encoded using the longest [IEEE754] variant. Appendix B.2 features a list of floating-point sample values and their expected encoding.
 - RFC+: NaN values with payloads (like f97e01), or having the most significant bit set ("signaling"), MUST be rejected. See also Appendix B.4 for invalid NaN variants.
 - RCF+: UNLIKE CBOR/c and standard CDE encoding, map keys MUST be typed as strings; no other types are allowed as map keys.
@@ -167,19 +165,17 @@ To facilitate cross-platform protocol interoperability, implementers of CBOR-42 
 | uint              | Uint64    | 64-bit unsigned integer                | 1    |
 | float             | Float64   | 64-bit floating-point number           |      |
 | bool              | Boolean   | Boolean                                |      |
-| null              | Null      | Null                                   | 4    |
-| #7.nnn            | Simple    | ONLY null, false, true                 | 5    |
+| null              | Null      | Null                                   | 2    |
+| #7.nnn            | Simple    | ONLY null, false, true                 | 3    |
 | tstr              | String    | Text string                            |      |
 | bstr              | Bytes     | Byte string                            |      |
-| See note          | EpochTime | Time object expressed as a number      | 6    |
-| See note          | DateTime  | Time object expressed as a text string | 6    |
+| See note          | EpochTime | Time object expressed as a number      | 4    |
+| See note          | DateTime  | Time object expressed as a text string | 4    |
 
 1. Range testing MUST be performed using the traditional ranges for unsigned respectively two-complement numbers. That is, a hypothetical getUint8() MUST reject numbers outside of 0 to 255, whereas a hypothetical getInt8(), MUST reject numbers outside of -128 to 127.
-2. Note that a hypothetical getBigInt() MUST also accept CBOR int objects since int is used for integers that fit in CBOR major type 0 and 1 objects. See also Appendix B.1 and Appendix D.
-3. Some platforms do not natively support float32 and/or float16. In this case a hypothetical getFloat16() would need to use a bigger floating-point type for the return value. Note that a hypothetical getFloat16() MUST reject encountered Float32 and Float64 objects. See also Appendix C.
-4. Since a CBOR null typically represents the absence of a value, a decoder MUST provide a test-function, like isNull().
-5. Simple values in CBOR and CBOR/c include the ranges 0-23 and 32-255, all but three of which are invalid in CBOR-42; however, the capability to refer to boolean values (i.e. `true` and `false`) and `null` as major-type 7 simple values MUST be supported to guarantee interoperability with CBOR tooling generally.
-6. Since CBOR lacks a native-level time object, Section 3.4 of [RFC8949] introduces two variants of time objects using the CBOR tags 0 and 1, neither of which are supported by the CBOR/c-42 data model for historical interoperability reasons. To support time encoding stably, it is RECOMMENDED that EpochTime and/or DateTime types in input be force-typed as strings at the application level or at the ALDR level. Interoperability with other tooling may be difficult to achieve if support for these APIs is desired, and validating dates at higher layers may introduce new security issues at higher layers.
+2. Since a CBOR null typically represents the absence of a value, a decoder MUST provide a test-function, like isNull().
+3. Simple values in CBOR and CBOR/c include the ranges 0-23 and 32-255, all but three of which are invalid in CBOR-42; however, the capability to refer to boolean values (i.e. `true` and `false`) and `null` as major-type 7 simple values MUST be supported to guarantee interoperability with CBOR tooling generally.
+4. Since CBOR lacks a native-level time object, Section 3.4 of [RFC8949] introduces two variants of time objects using the CBOR tags 0 and 1, neither of which are supported by the CBOR/c-42 data model for historical interoperability reasons. To support time encoding stably, it is RECOMMENDED that EpochTime and/or DateTime types in input be force-typed as strings at the application level or at the ALDR level. Interoperability with other tooling may be difficult to achieve if support for these APIs is desired, and validating dates at higher layers may introduce new security issues at higher layers.
 
 If a call does not match the underlying CBOR type, the call MUST be rejected.
 
@@ -238,7 +234,6 @@ Prepending `0x00` (padding byte), `0x01` (CID version), `0x70` (DAG-profiled pro
 For guidance on protobuf deserialization, see protobuf.dev or the relevant [protobuf] draft RFC.
 
 Likewise, some specialized applications that can strictly assume segments 1-3 or 1-5 will be invariant systemwide have been observed to use "truncated" content identifiers, prepending the invariant prefixes only in transformations at point of egress for interoperability purposes.
-
 This is not best practice but can also serve as some explanation for the padding byte.
 
 # Test Vectors
@@ -272,10 +267,10 @@ This is not best practice but can also serve as some explanation for the padding
 
 The textual representation of the values is based on the serialization method for the Number data type, defined by [ECMASCRIPT] with one change: to comply with diagnostic notation (section 8 of [RFC8949]), all values are expressed as floating-point numbers. The rationale for using [ECMASCRIPT] serialization is because it is supposed to generate the shortest and most correct representation of [IEEE754] numbers.
 
-| Diagnostic Notation | CBOR/c-42 Encoding | CBOR/c Encoding | Comment |
+| Diagnostic Notation | CBOR-42 Encoding | CBOR Encoding | Comment |
 |----|----|----|----|
-| 0.0 | ? | f90000 | Zero |
-| -0.0 | ? | f98000 | Negative zero |
+| 0.0 | f90000 | f90000 | Zero |
+| -0.0 | f98000 | f98000 | Negative zero |
 | Infinity | invalid | f97c00 | Infinity |
 | -Infinity | invalid | f9fc00 | Negative infinity |
 | NaN | invalid | f97e00 | Not a number |
@@ -352,6 +347,7 @@ The textual representation of the values is based on the serialization method fo
 | 5b0010000000000000 |  | Extremely large bstr length indicator: 4503599627370496 |
 | 18446744073709551616 | c249010000000000000000 | Smallest positive bigint |
 | -18446744073709551617 | c349010000000000000000 | Smallest negative bigint |
+
 
 # Configuration and ALDRs
 
