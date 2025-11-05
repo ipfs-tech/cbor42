@@ -21,7 +21,7 @@ venue:
   mail: "cbor@ietf.org"
   arch: "https://www.ietf.org/mail-archive/web/cbor/current/maillist.html"
   github: "ipfs-tech/cborc42"
-  latest: "https://ipfs-tech.github.io/cborc42/draft-caballero-cbor-cborc42.html"
+  latest: "https://ipfs-tech.github.io/cborc42/draft-caballero-cbor-cborc42-latest.html"
 
 author:
  -
@@ -127,7 +127,8 @@ As in CBOR/c, deterministic encoding is mandatory. The encoding scheme adheres t
 - RFC+: UNLIKE CBOR/c and standard CDE encoding, floating-point numbers MUST always be encoded using the longest [IEEE754] variant. Appendix B.2 features a list of floating-point sample values and their expected encoding.
 - RFC+: NaN values with payloads (like f97e01), or having the most significant bit set ("signaling"), MUST be rejected. See also Appendix B.4 for invalid NaN variants.
 - RCF+: UNLIKE CBOR/c and standard CDE encoding, map keys MUST be typed as strings; no other types are allowed as map keys.
-- RFC: Map keys MUST be sorted in the bytewise lexicographic order of their deterministic encoding. Duplicate keys (i.e. keys with identical deterministic bytestring values) MUST be rejected; note that semantic equivalence is not tested. As per the "Canonical CBOR" section (3.9) in [RFC7049], the following represents a properly sorted map:
+- RFC: Map keys MUST be strings and MUST be sorted "length-first", which (because they are strings) can always be achieved by sorting in bytewise lexicographic order. Duplicate keys (i.e. keys with identical deterministic bytestring values) MUST be rejected. Note that semantic equivalence is not tested.
+  - Since map keys must be strings, the following represents a properly sorted map, whether sorted according to the "Canonical CBOR" algorithm (section (3.9) in [RFC7049]) OR the "deterministically encoded" algorithm (section (4.2.3) in [RFC8949]):
 {
   "a": ... ,
   "b": ... ,
