@@ -5,7 +5,7 @@
 Concise Binary Object Representation Maintenance and ExtensionsJ. Caballero
 Internet-Draft                                                 R. Berjon
 Intended status: Informational                           IPFS Foundation
-Expires: 7 May 2026                                      3 November 2025
+Expires: 9 May 2026                                      5 November 2025
 
 
                        The tag-42 profile of CBOR
@@ -30,8 +30,8 @@ About This Document
    This note is to be removed before publishing as an RFC.
 
    The latest revision of this draft can be found at https://ipfs-
-   tech.github.io/cborc42/draft-caballero-cbor-cborc42.html.  Status
-   information for this document may be found at
+   tech.github.io/cborc42/draft-caballero-cbor-cborc42-latest.html.
+   Status information for this document may be found at
    https://datatracker.ietf.org/doc/draft-caballero-cbor-cbor42/.
 
    Discussion of this document takes place on the Concise Binary Object
@@ -58,7 +58,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on 7 May 2026.
+   This Internet-Draft will expire on 9 May 2026.
 
 Copyright Notice
 
@@ -219,12 +219,17 @@ Table of Contents
    *  RCF+: UNLIKE CBOR/c and standard CDE encoding, map keys MUST be
       typed as strings; no other types are allowed as map keys.
 
-   *  RFC: Map keys MUST be sorted in the bytewise lexicographic order
-      of their deterministic encoding.  Duplicate keys (i.e. keys with
-      identical deterministic bytestring values) MUST be rejected; note
-      that semantic equivalence is not tested.  As per the "Canonical
-      CBOR" section (3.9) in [RFC7049], the following represents a
-      properly sorted map: { "a": ... , "b": ... , "aa": ... }
+   *  RFC: Map keys MUST be strings and MUST be sorted "length-first",
+      which (because they are strings) can always be achieved by sorting
+      in bytewise lexicographic order.  Duplicate keys (i.e. keys with
+      identical deterministic bytestring values) MUST be rejected.  Note
+      that semantic equivalence is not tested.
+
+      -  Since map keys must be strings, the following represents a
+         properly sorted map, whether sorted according to the "Canonical
+         CBOR" algorithm (section (3.9) in [RFC7049]) OR the
+         "deterministically encoded" algorithm (section (4.2.3) in
+         [RFC8949]): { "a": ... , "b": ... , "aa": ... }
 
    *  RFC+: Since CBOR encodings according to this specification
       maintain uniqueness, there are no specific restrictions or tests
@@ -590,9 +595,9 @@ B.2.  Floating Point Numbers
    +=========================+==================+==================+===========+
    |Diagnostic Notation      |CBOR-42 Encoding  |CBOR Encoding     |Comment    |
    +=========================+==================+==================+===========+
-   |0.0                      |f90000            |f90000            |Zero       |
+   |0.0                      |fb0000000000000000|fb0000000000000000|Zero       |
    +-------------------------+------------------+------------------+-----------+
-   |-0.0                     |f98000            |f98000            |Negative   |
+   |-0.0                     |fb8000000000000000|fb8000000000000000|Negative   |
    |                         |                  |                  |zero       |
    +-------------------------+------------------+------------------+-----------+
    |Infinity                 |invalid           |f97c00            |Infinity   |
@@ -613,12 +618,12 @@ B.2.  Floating Point Numbers
    |                         |                  |                  |subnormal  |
    |                         |                  |                  |float16    |
    +-------------------------+------------------+------------------+-----------+
-   |0.00006103515625         |fb                |f90400            |Smallest   |
-   |                         |3f10000000000000  |                  |positive   |
+   |0.00006103515625         |fb3f10000000000000|f90400            |Smallest   |
+   |                         |                  |                  |positive   |
    |                         |                  |                  |float16    |
    +-------------------------+------------------+------------------+-----------+
-   |65504.0                  |fb                |f97bff            |Largest    |
-   |                         |40effc0000000000  |                  |positive   |
+   |65504.0                  |fb40effc0000000000|f97bff            |Largest    |
+   |                         |                  |                  |positive   |
    |                         |                  |                  |float16    |
    +-------------------------+------------------+------------------+-----------+
    |1.401298464324817e-45    |fb36a0000000000000|fa00000001        |Smallest   |
@@ -635,8 +640,8 @@ B.2.  Floating Point Numbers
    |                         |                  |                  |positive   |
    |                         |                  |                  |float32    |
    +-------------------------+------------------+------------------+-----------+
-   |3.4028234663852886e+38   |fb                |fa7f7fffff        |Largest    |
-   |                         |47efffffe0000000  |                  |positive   |
+   |3.4028234663852886e+38   |fb47efffffe0000000|fa7f7fffff        |Largest    |
+   |                         |                  |                  |positive   |
    |                         |                  |                  |float32    |
    +-------------------------+------------------+------------------+-----------+
    |5.0e-324                 |fb0000000000000001|fb0000000000000001|Smallest   |
@@ -666,8 +671,8 @@ B.2.  Floating Point Numbers
    |10.559998512268068       |fb40251eb820000001|fb40251eb820000001|Next in    |
    |                         |                  |                  |succession |
    +-------------------------+------------------+------------------+-----------+
-   |295147905179352830000.0  |fb                |fa61800000        |268        |
-   |                         |4430000000000000  |                  |(diagnostic|
+   |295147905179352830000.0  |fb4430000000000000|fa61800000        |268        |
+   |                         |                  |                  |(diagnostic|
    |                         |                  |                  |notation   |
    |                         |                  |                  |truncates  |
    |                         |                  |                  |precision) |
@@ -787,56 +792,53 @@ B.3.  Miscellaneous Items
 
 B.4.  Invalid Encodings
 
-   +==========================+======================+================+
-   | CBOR Encoding            |Diagnostic Notation   |Comment         |
-   +==========================+======================+================+
-   | a2616201616100           |{ "b": 1, "a": 0 }    |Improper map key|
-   |                          |                      |ordering        |
-   +--------------------------+----------------------+----------------+
-   | 1900ff                   |255                   |Number with     |
-   |                          |                      |leading zero    |
-   |                          |                      |bytes           |
-   +--------------------------+----------------------+----------------+
-   | c34a00010000000000000000 |-18446744073709551617 |Number with     |
-   |                          |                      |leading zero    |
-   |                          |                      |bytes           |
-   +--------------------------+----------------------+----------------+
-   | Fa41280000               |10.5                  |Not in shortest |
-   |                          |                      |encoding        |
-   +--------------------------+----------------------+----------------+
-   | c243010000               |65536                 |Incorrect value |
-   |                          |                      |for bigint      |
-   +--------------------------+----------------------+----------------+
-   | fa7fc00000               |NaN                   |Not in shortest |
-   |                          |                      |encoding        |
-   +--------------------------+----------------------+----------------+
-   | f97e01                   |NaN                   |NaN with payload|
-   +--------------------------+----------------------+----------------+
-   | f97e00                   |NaN                   |NaN disallowed  |
-   |                          |                      |even in shortest|
-   |                          |                      |encoding        |
-   +--------------------------+----------------------+----------------+
-   | 5f4101420203ff           |(_ h'01', h'0203')    |Indefinite      |
-   |                          |                      |length object   |
-   +--------------------------+----------------------+----------------+
-   | fc                       |                      |Reserved        |
-   +--------------------------+----------------------+----------------+
-   | f818                     |                      |Invalid simple  |
-   |                          |                      |value           |
-   +--------------------------+----------------------+----------------+
-   | 5b0010000000000000       |                      |Extremely large |
-   |                          |                      |bstr length     |
-   |                          |                      |indicator:      |
-   |                          |                      |4503599627370496|
-   +--------------------------+----------------------+----------------+
-   | 18446744073709551616     |c249010000000000000000|Smallest        |
-   |                          |                      |positive bigint |
-   +--------------------------+----------------------+----------------+
-   | -18446744073709551617    |c349010000000000000000|Smallest        |
-   |                          |                      |negative bigint |
-   +--------------------------+----------------------+----------------+
+    +==========================+=====================+================+
+    | CBOR Encoding            |Diagnostic Notation  |Comment         |
+    +==========================+=====================+================+
+    | a2616201616100           |{ "b": 1, "a": 0 }   |Improper map key|
+    |                          |                     |ordering        |
+    +--------------------------+---------------------+----------------+
+    | 1900ff                   |255                  |Number with     |
+    |                          |                     |leading zero    |
+    |                          |                     |bytes           |
+    +--------------------------+---------------------+----------------+
+    | c34a00010000000000000000 |-18446744073709551617|Number with     |
+    |                          |                     |leading zero    |
+    |                          |                     |bytes           |
+    +--------------------------+---------------------+----------------+
+    | Fa41280000               |10.5                 |Only 64-bit     |
+    |                          |                     |floats          |
+    +--------------------------+---------------------+----------------+
+    | c243010000               |65536                |bigints not     |
+    |                          |                     |allowed         |
+    +--------------------------+---------------------+----------------+
+    | c249010000000000000000   |18446744073709551616 |bigints not     |
+    |                          |                     |allowed         |
+    +--------------------------+---------------------+----------------+
+    | c349010000000000000000   |-18446744073709551617|bigints not     |
+    |                          |                     |allowed         |
+    +--------------------------+---------------------+----------------+
+    | fa7fc00000               |NaN                  |NaNs not allowed|
+    +--------------------------+---------------------+----------------+
+    | f97e01                   |NaN                  |NaNs not allowed|
+    +--------------------------+---------------------+----------------+
+    | f97e00                   |NaN                  |NaNs not allowed|
+    +--------------------------+---------------------+----------------+
+    | 5f4101420203ff           |(_ h'01', h'0203')   |Indefinite      |
+    |                          |                     |length object   |
+    +--------------------------+---------------------+----------------+
+    | fc                       |                     |Reserved        |
+    +--------------------------+---------------------+----------------+
+    | f818                     |                     |Invalid simple  |
+    |                          |                     |value           |
+    +--------------------------+---------------------+----------------+
+    | 5b0010000000000000       |                     |Extremely large |
+    |                          |                     |bstr length     |
+    |                          |                     |indicator:      |
+    |                          |                     |4503599627370496|
+    +--------------------------+---------------------+----------------+
 
-                                 Table 6
+                                  Table 6
 
 Appendix C.  Configuration and ALDRs
 

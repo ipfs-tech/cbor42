@@ -1053,7 +1053,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Caballero &amp; Berjon</td>
-<td class="center">Expires 7 May 2026</td>
+<td class="center">Expires 9 May 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1066,12 +1066,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-caballero-cbor-cbor42-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2025-11-03" class="published">3 November 2025</time>
+<time datetime="2025-11-05" class="published">5 November 2025</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-05-07">7 May 2026</time></dd>
+<dd class="expires"><time datetime="2026-05-09">9 May 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1099,7 +1099,7 @@ Since CBOR-42 objects link to one another by hash-based identifiers tagged "42",
       </h2>
 <p id="section-note.1-1">This note is to be removed before publishing as an RFC.<a href="#section-note.1-1" class="pilcrow">¶</a></p>
 <p id="section-note.1-2">
-        The latest revision of this draft can be found at <span><a href="https://ipfs-tech.github.io/cborc42/draft-caballero-cbor-cborc42.html">https://ipfs-tech.github.io/cborc42/draft-caballero-cbor-cborc42.html</a></span>.
+        The latest revision of this draft can be found at <span><a href="https://ipfs-tech.github.io/cborc42/draft-caballero-cbor-cborc42-latest.html">https://ipfs-tech.github.io/cborc42/draft-caballero-cbor-cborc42-latest.html</a></span>.
         Status information for this document may be found at <span><a href="https://datatracker.ietf.org/doc/draft-caballero-cbor-cbor42/">https://datatracker.ietf.org/doc/draft-caballero-cbor-cbor42/</a></span>.<a href="#section-note.1-2" class="pilcrow">¶</a></p>
 <p id="section-note.1-3">
         Discussion of this document takes place on the
@@ -1128,7 +1128,7 @@ Since CBOR-42 objects link to one another by hash-based identifiers tagged "42",
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 7 May 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 9 May 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1396,12 +1396,17 @@ appear in all capitals, as shown here.<a href="#section-1.2-1" class="pilcrow">�
             <p id="section-2.2-2.5.1">RCF+: UNLIKE CBOR/c and standard CDE encoding, map keys <span class="bcp14">MUST</span> be typed as strings; no other types are allowed as map keys.<a href="#section-2.2-2.5.1" class="pilcrow">¶</a></p>
 </li>
           <li class="normal" id="section-2.2-2.6">
-            <p id="section-2.2-2.6.1">RFC: Map keys <span class="bcp14">MUST</span> be sorted in the bytewise lexicographic order of their deterministic encoding. Duplicate keys (i.e. keys with identical deterministic bytestring values) <span class="bcp14">MUST</span> be rejected; note that semantic equivalence is not tested. As per the "Canonical CBOR" section (3.9) in <span>[<a href="#RFC7049" class="cite xref">RFC7049</a>]</span>, the following represents a properly sorted map:
+            <p id="section-2.2-2.6.1">RFC: Map keys <span class="bcp14">MUST</span> be strings and <span class="bcp14">MUST</span> be sorted "length-first", which (because they are strings) can always be achieved by sorting in bytewise lexicographic order. Duplicate keys (i.e. keys with identical deterministic bytestring values) <span class="bcp14">MUST</span> be rejected. Note that semantic equivalence is not tested.<a href="#section-2.2-2.6.1" class="pilcrow">¶</a></p>
+<ul class="normal">
+<li class="normal" id="section-2.2-2.6.2.1">
+                <p id="section-2.2-2.6.2.1.1">Since map keys must be strings, the following represents a properly sorted map, whether sorted according to the "Canonical CBOR" algorithm (section (3.9) in <span>[<a href="#RFC7049" class="cite xref">RFC7049</a>]</span>) OR the "deterministically encoded" algorithm (section (4.2.3) in <span>[<a href="#RFC8949" class="cite xref">RFC8949</a>]</span>):
 {
 "a": ... ,
 "b": ... ,
 "aa": ...
-}<a href="#section-2.2-2.6.1" class="pilcrow">¶</a></p>
+}<a href="#section-2.2-2.6.2.1.1" class="pilcrow">¶</a></p>
+</li>
+            </ul>
 </li>
           <li class="normal" id="section-2.2-2.7">
             <p id="section-2.2-2.7.1">RFC+: Since CBOR encodings according to this specification maintain uniqueness, there are no specific restrictions or tests needed in order to determine map key equivalence. As an (extreme) example, the floating-point numbers 0.0 and -0.0, and the integer number 0 could all get force-typed as three distinct strings (<code>0.0</code>, <code>-0.0</code>, and <code>0</code>) without colliding.<a href="#section-2.2-2.7.1" class="pilcrow">¶</a></p>
@@ -1894,14 +1899,14 @@ This is not best practice but can also serve as some explanation for the padding
           <tbody>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0.0</td>
-              <td class="text-left" rowspan="1" colspan="1">f90000</td>
-              <td class="text-left" rowspan="1" colspan="1">f90000</td>
+              <td class="text-left" rowspan="1" colspan="1">fb0000000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fb0000000000000000</td>
               <td class="text-left" rowspan="1" colspan="1">Zero</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">-0.0</td>
-              <td class="text-left" rowspan="1" colspan="1">f98000</td>
-              <td class="text-left" rowspan="1" colspan="1">f98000</td>
+              <td class="text-left" rowspan="1" colspan="1">fb8000000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fb8000000000000000</td>
               <td class="text-left" rowspan="1" colspan="1">Negative zero</td>
             </tr>
             <tr>
@@ -1936,13 +1941,13 @@ This is not best practice but can also serve as some explanation for the padding
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">0.00006103515625</td>
-              <td class="text-left" rowspan="1" colspan="1">fb 3f10000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fb3f10000000000000</td>
               <td class="text-left" rowspan="1" colspan="1">f90400</td>
               <td class="text-left" rowspan="1" colspan="1">Smallest positive float16</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">65504.0</td>
-              <td class="text-left" rowspan="1" colspan="1">fb 40effc0000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fb40effc0000000000</td>
               <td class="text-left" rowspan="1" colspan="1">f97bff</td>
               <td class="text-left" rowspan="1" colspan="1">Largest positive float16</td>
             </tr>
@@ -1966,7 +1971,7 @@ This is not best practice but can also serve as some explanation for the padding
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">3.4028234663852886e+38</td>
-              <td class="text-left" rowspan="1" colspan="1">fb 47efffffe0000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fb47efffffe0000000</td>
               <td class="text-left" rowspan="1" colspan="1">fa7f7fffff</td>
               <td class="text-left" rowspan="1" colspan="1">Largest positive float32</td>
             </tr>
@@ -2014,7 +2019,7 @@ This is not best practice but can also serve as some explanation for the padding
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">295147905179352830000.0</td>
-              <td class="text-left" rowspan="1" colspan="1">fb 4430000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">fb4430000000000000</td>
               <td class="text-left" rowspan="1" colspan="1">fa61800000</td>
               <td class="text-left" rowspan="1" colspan="1">268 (diagnostic notation truncates precision)</td>
             </tr>
@@ -2261,27 +2266,37 @@ This is not best practice but can also serve as some explanation for the padding
             <tr>
               <td class="text-left" rowspan="1" colspan="1">Fa41280000</td>
               <td class="text-left" rowspan="1" colspan="1">10.5</td>
-              <td class="text-left" rowspan="1" colspan="1">Not in shortest encoding</td>
+              <td class="text-left" rowspan="1" colspan="1">Only 64-bit floats</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">c243010000</td>
               <td class="text-left" rowspan="1" colspan="1">65536</td>
-              <td class="text-left" rowspan="1" colspan="1">Incorrect value for bigint</td>
+              <td class="text-left" rowspan="1" colspan="1">bigints not allowed</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">c249010000000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">18446744073709551616</td>
+              <td class="text-left" rowspan="1" colspan="1">bigints not allowed</td>
+            </tr>
+            <tr>
+              <td class="text-left" rowspan="1" colspan="1">c349010000000000000000</td>
+              <td class="text-left" rowspan="1" colspan="1">-18446744073709551617</td>
+              <td class="text-left" rowspan="1" colspan="1">bigints not allowed</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">fa7fc00000</td>
               <td class="text-left" rowspan="1" colspan="1">NaN</td>
-              <td class="text-left" rowspan="1" colspan="1">Not in shortest encoding</td>
+              <td class="text-left" rowspan="1" colspan="1">NaNs not allowed</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">f97e01</td>
               <td class="text-left" rowspan="1" colspan="1">NaN</td>
-              <td class="text-left" rowspan="1" colspan="1">NaN with payload</td>
+              <td class="text-left" rowspan="1" colspan="1">NaNs not allowed</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">f97e00</td>
               <td class="text-left" rowspan="1" colspan="1">NaN</td>
-              <td class="text-left" rowspan="1" colspan="1">NaN disallowed even in shortest encoding</td>
+              <td class="text-left" rowspan="1" colspan="1">NaNs not allowed</td>
             </tr>
             <tr>
               <td class="text-left" rowspan="1" colspan="1">5f4101420203ff</td>
@@ -2302,16 +2317,6 @@ This is not best practice but can also serve as some explanation for the padding
               <td class="text-left" rowspan="1" colspan="1">5b0010000000000000</td>
               <td class="text-left" rowspan="1" colspan="1"> </td>
               <td class="text-left" rowspan="1" colspan="1">Extremely large bstr length indicator: 4503599627370496</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">18446744073709551616</td>
-              <td class="text-left" rowspan="1" colspan="1">c249010000000000000000</td>
-              <td class="text-left" rowspan="1" colspan="1">Smallest positive bigint</td>
-            </tr>
-            <tr>
-              <td class="text-left" rowspan="1" colspan="1">-18446744073709551617</td>
-              <td class="text-left" rowspan="1" colspan="1">c349010000000000000000</td>
-              <td class="text-left" rowspan="1" colspan="1">Smallest negative bigint</td>
             </tr>
           </tbody>
         </table>
