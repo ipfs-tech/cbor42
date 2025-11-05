@@ -269,19 +269,19 @@ The textual representation of the values is based on the serialization method fo
 
 | Diagnostic Notation | CBOR-42 Encoding | CBOR Encoding | Comment |
 |----|----|----|----|
-| 0.0 | f90000 | f90000 | Zero |
-| -0.0 | f98000 | f98000 | Negative zero |
+| 0.0 | fb0000000000000000 | fb0000000000000000 | Zero |
+| -0.0 | fb8000000000000000 | fb8000000000000000 | Negative zero |
 | Infinity | invalid | f97c00 | Infinity |
 | -Infinity | invalid | f9fc00 | Negative infinity |
 | NaN | invalid | f97e00 | Not a number |
 | 5.960464477539063e-8 | fb3e70000000000000 | f90001 | Smallest positive subnormal float16 |
 | 0.00006097555160522461 | fb3f0ff80000000000 | f903ff | Largest positive subnormal float16 |
-| 0.00006103515625 | fb 3f10000000000000 | f90400 | Smallest positive float16 |
-| 65504.0 | fb 40effc0000000000 | f97bff | Largest positive float16 |
+| 0.00006103515625 | fb3f10000000000000 | f90400 | Smallest positive float16 |
+| 65504.0 | fb40effc0000000000 | f97bff | Largest positive float16 |
 | 1.401298464324817e-45 | fb36a0000000000000 | fa00000001 | Smallest positive subnormal float32 |
 | 1.1754942106924411e-38 | fb380fffffc0000000 | fa007fffff | Largest positive subnormal float32 |
 | 1.1754943508222875e-38 | fb3810000000000000 | fa00800000 | Smallest positive float32 |
-| 3.4028234663852886e+38 | fb 47efffffe0000000 | fa7f7fffff | Largest positive float32 |
+| 3.4028234663852886e+38 | fb47efffffe0000000 | fa7f7fffff | Largest positive float32 |
 | 5.0e-324 | fb0000000000000001 | fb0000000000000001 | Smallest positive subnormal float64 |
 | 2.225073858507201e-308 | fb000fffffffffffff | fb000fffffffffffff | Largest positive subnormal float64 |
 | 2.2250738585072014e-308 | fb0010000000000000 | fb0010000000000000 | Smallest positive float64 |
@@ -289,7 +289,7 @@ The textual representation of the values is based on the serialization method fo
 | -0.0000033333333333333333 | fbbecbf647612f3696 | fbbecbf647612f3696 | Randomly selected number |
 | 10.559998512268066 | fb40251eb820000000 | fa4128f5c1 | -"- |
 | 10.559998512268068 | fb40251eb820000001 | fb40251eb820000001 | Next in succession |
-| 295147905179352830000.0 | fb 4430000000000000 | fa61800000 | 268 (diagnostic notation truncates precision) |
+| 295147905179352830000.0 | fb4430000000000000 | fa61800000 | 268 (diagnostic notation truncates precision) |
 | 2.0 | fb4000000000000000 | f94000 | Number without a fractional part |
 | -5.960464477539063e-8 | fbbe70000000000000 | f98001 | Smallest negative subnormal float16 |
 | -5.960464477539062e-8 | fbbe6fffffffffffff | fbbe6fffffffffffff | Adjacent smallest negative subnormal float16 |
@@ -336,17 +336,17 @@ The textual representation of the values is based on the serialization method fo
 | a2616201616100 | { "b": 1, "a": 0 } | Improper map key ordering |
 | 1900ff | 255 | Number with leading zero bytes |
 | c34a00010000000000000000 | -18446744073709551617 | Number with leading zero bytes |
-| Fa41280000 | 10.5 | Not in shortest encoding |
-| c243010000 | 65536 | Incorrect value for bigint |
-| fa7fc00000 | NaN | Not in shortest encoding |
-| f97e01 | NaN | NaN with payload |
-| f97e00 | NaN | NaN disallowed even in shortest encoding |
+| Fa41280000 | 10.5 | Only 64-bit floats |
+| c243010000 | 65536 | bigints not allowed |
+| c249010000000000000000 | 18446744073709551616 |  bigints not allowed |
+| c349010000000000000000 | -18446744073709551617 | bigints not allowed |
+| fa7fc00000 | NaN | NaNs not allowed |
+| f97e01 | NaN | NaNs not allowed |
+| f97e00 | NaN | NaNs not allowed |
 | 5f4101420203ff | (\_ h'01', h'0203') | Indefinite length object |
 | fc |  | Reserved |
 | f818 |  | Invalid simple value |
 | 5b0010000000000000 |  | Extremely large bstr length indicator: 4503599627370496 |
-| 18446744073709551616 | c249010000000000000000 | Smallest positive bigint |
-| -18446744073709551617 | c349010000000000000000 | Smallest negative bigint |
 
 
 # Configuration and ALDRs
