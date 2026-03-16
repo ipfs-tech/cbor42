@@ -10,18 +10,20 @@ date:
 consensus: true
 v: 3
 area: ""
-workgroup: "Concise Binary Object Representation Maintenance and Extensions"
+workgroup: "Decentralization of the Internet"
 keyword:
+ - serialization
  - CBOR
  - deterministic encoding
- - sparkling distributed ledger
+ - decentralization
+ - sparkling distributed systems
 venue:
-  group: "Concise Binary Object Representation Maintenance and Extensions"
+  group: "Decentralization of the Internet"
   type: ""
-  mail: "cbor@ietf.org"
-  arch: "https://www.ietf.org/mail-archive/web/cbor/current/maillist.html"
-  github: "ipfs-tech/cborc42"
-  latest: "https://ipfs-tech.github.io/cborc42/draft-caballero-cbor-cborc42-latest.html"
+  mail: "din@ietf.org"
+  arch: "https://mailarchive.ietf.org/arch/browse/din/"
+  github: "ipfs-tech/cbor42"
+  latest: "https://ipfs-tech.github.io/cbor42/draft-caballero-cbor-cbor42.html"
 
 author:
  -
