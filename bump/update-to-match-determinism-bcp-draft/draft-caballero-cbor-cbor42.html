@@ -13,24 +13,24 @@ Much of its design dates to the first CBOR RFC and predates much of the terminol
        CBOR-42 can be used as an internet-scale serialization for JSON, and is optimized for objects that compose into a directed acyclical graph.
 Since CBOR-42 objects link to one another by hash-based identifiers tagged "42", deterministic encoding is mandated to verify dereferenced links and encode new ones. 
     ' name="description">
-<meta content="xml2rfc 3.31.0" name="generator">
+<meta content="xml2rfc 3.32.0" name="generator">
 <meta content="CBOR" name="keyword">
 <meta content="deterministic encoding" name="keyword">
 <meta content="sparkling distributed ledger" name="keyword">
 <meta content="draft-caballero-cbor-cbor42-latest" name="ietf.draft">
 <!-- Generator version information:
-  xml2rfc 3.31.0
+  xml2rfc 3.32.0
     Python 3.12.12
     ConfigArgParse 1.7
     google-i18n-address 3.1.1
     intervaltree 3.2.1
     Jinja2 3.1.6
     lxml 6.0.2
-    platformdirs 4.5.1
+    platformdirs 4.9.4
     pycountry 24.6.1
     PyYAML 6.0.3
     requests 2.32.5
-    wcwidth 0.3.0
+    wcwidth 0.6.0
 -->
 <link href="draft-caballero-cbor-cbor42.xml" rel="alternate" type="application/rfc+xml">
 <link href="#copyright" rel="license">
@@ -1055,7 +1055,7 @@ svg :is([fill="white"], [fill^="#fff"]) {
 </tr></thead>
 <tfoot><tr>
 <td class="left">Caballero &amp; Berjon</td>
-<td class="center">Expires 7 September 2026</td>
+<td class="center">Expires 17 September 2026</td>
 <td class="right">[Page]</td>
 </tr></tfoot>
 </table>
@@ -1068,12 +1068,12 @@ svg :is([fill="white"], [fill^="#fff"]) {
 <dd class="internet-draft">draft-caballero-cbor-cbor42-latest</dd>
 <dt class="label-published">Published:</dt>
 <dd class="published">
-<time datetime="2026-03-06" class="published">6 March 2026</time>
+<time datetime="2026-03-16" class="published">16 March 2026</time>
     </dd>
 <dt class="label-intended-status">Intended Status:</dt>
 <dd class="intended-status">Informational</dd>
 <dt class="label-expires">Expires:</dt>
-<dd class="expires"><time datetime="2026-09-07">7 September 2026</time></dd>
+<dd class="expires"><time datetime="2026-09-17">17 September 2026</time></dd>
 <dt class="label-authors">Authors:</dt>
 <dd class="authors">
 <div class="author">
@@ -1130,7 +1130,7 @@ Since CBOR-42 objects link to one another by hash-based identifiers tagged "42",
         time. It is inappropriate to use Internet-Drafts as reference
         material or to cite them other than as "work in progress."<a href="#section-boilerplate.1-3" class="pilcrow">¶</a></p>
 <p id="section-boilerplate.1-4">
-        This Internet-Draft will expire on 7 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
+        This Internet-Draft will expire on 17 September 2026.<a href="#section-boilerplate.1-4" class="pilcrow">¶</a></p>
 </section>
 </div>
 <div id="copyright">
@@ -1377,7 +1377,7 @@ appear in all capitals, as shown here.<a href="#section-1.2-1" class="pilcrow">�
         <h3 id="name-cbor-42-serialization">
 <a href="#section-2.2" class="section-number selfRef">2.2. </a><a href="#name-cbor-42-serialization" class="section-name selfRef">CBOR-42 Serialization</a>
         </h3>
-<p id="section-2.2-1">CBOR-42 was designed for determinism (a decade before the generalized CDE deterministic serialization or dCBOR was finalized) and the protocols and applications that it was design for all mandate its strict encoding.
+<p id="section-2.2-1">CBOR-42 was designed for determinism (a decade before the generalized CDE deterministic serialization or dCBOR was finalized) and the protocols and applications that it was designed for all mandate its strict encoding.
 The encoding scheme is most similar to the deterministic encoding, but with some major differences.
 The following list contains a summary of these differences:<a href="#section-2.2-1" class="pilcrow">¶</a></p>
 <ul class="normal">
