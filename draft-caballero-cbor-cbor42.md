@@ -121,7 +121,7 @@ This section describes the CBOR-42 serialization and how it differs from a deter
 
 ## CBOR-42 Serialization
 
-CBOR-42 was designed for determinism (a decade before the generalized CDE deterministic serialization or dCBOR was finalized) and the protocols and applications that it was design for all mandate its strict encoding.
+CBOR-42 was designed for determinism (a decade before the generalized CDE deterministic serialization or dCBOR was finalized) and the protocols and applications that it was designed for all mandate its strict encoding.
 The encoding scheme is most similar to the deterministic encoding, but with some major differences.
 The following list contains a summary of these differences:
 
