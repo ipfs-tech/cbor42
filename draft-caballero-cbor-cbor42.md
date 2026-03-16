@@ -4,24 +4,26 @@ abbrev: "CBOR42"
 category: info
 
 docname: draft-caballero-cbor-cbor42-latest
-submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
+submissiontype: IRTF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
 consensus: true
 v: 3
 area: ""
-workgroup: "Concise Binary Object Representation Maintenance and Extensions"
+workgroup: "Decentralization of the Internet"
 keyword:
+ - serialization
  - CBOR
  - deterministic encoding
- - sparkling distributed ledger
+ - decentralization
+ - sparkling distributed systems
 venue:
-  group: "Concise Binary Object Representation Maintenance and Extensions"
+  group: "Decentralization of the Internet"
   type: ""
-  mail: "cbor@ietf.org"
-  arch: "https://www.ietf.org/mail-archive/web/cbor/current/maillist.html"
-  github: "ipfs-tech/cborc42"
-  latest: "https://ipfs-tech.github.io/cborc42/draft-caballero-cbor-cborc42-latest.html"
+  mail: "din@ietf.org"
+  arch: "https://mailarchive.ietf.org/arch/browse/din/"
+  github: "ipfs-tech/cbor42"
+  latest: "https://ipfs-tech.github.io/cbor42/draft-caballero-cbor-cbor42.html"
 
 author:
  -
@@ -63,30 +65,33 @@ informative:
   ECMASCRIPT:
     title: ECMAScript® 2024 Language Specification
     target: https://www.ecma-international.org/publications/standards/Ecma-262.htm
+  Determinism:
+    title: CBOR Serialization and Determinism
+    target: https://datatracker.ietf.org/doc/draft-ietf-cbor-serialization/
 
 --- abstract
 
-This document defines a very narrow profile of CBOR intended for use with the special tag 42.
-Like the earlier internet-draft submitted under the name "CBOR Core," much of its design dates to the first CBOR RFC and predates much of the layered approach to determinism and profiling in later years.
+This document defines a bespoke serialization of CBOR intended for use with the special tag 42 in various end-to-end protocols that came out of the IPFS community.
+Much of its design dates to the first CBOR RFC and predates much of the terminology and the layered approach to determinism elaborated in later years.
 
-Also like "CBOR/c", CBOR-42 can be used as an internet-scale serialization for JSON, and is optimized for objects that compose into a directed acyclical graph.
+CBOR-42 can be used as an internet-scale serialization for JSON, and is optimized for objects that compose into a directed acyclical graph.
 Since CBOR-42 objects link to one another by hash-based identifiers tagged "42", deterministic encoding is mandated to verify dereferenced links and encode new ones.
 
 --- middle
 
 # Introduction
 
-The developer ecosystem around the Interplanetary File System, a distributed system file and document handling, has long made structural usage of its own home-grown CBOR profile, dating from the early days of the CBOR working group and fine-tuned over the years in community/internal venues.
+The developer ecosystem around the Interplanetary File System, a distributed system file and document handling, has long made structural usage of its own home-grown CBOR serialization, dating from the early days of the CBOR working group and fine-tuned over the years in community/internal venues.
 Configuring CBOR tooling in various languages to decode this data and encode new data conformantly has been a challenge, and a unified specification (updated to modern terminology, as the CBOR working group has iterated and evolved so much in the intervening years) is set out in this document.
 
-Note: unlike the CBOR/c specification, no opinion on best practices for hashing or signing mechanisms is expressed here, and will be addressed in separate documents, if at all.
+Note: no opinion on best practices for hashing or signing mechanisms is expressed here, and will be addressed in separate documents, if at all.
 
 ## Design Goals
 
-The primary goal of this specification is enabling application developers to configure CBOR tooling for this profile, and for CBOR tooling to support such configuration, in as language-agnostic a way as possible.
-The historical design of this profile was to maximize determinism and simplicity for an internet-scale directed acyclical graph of CBOR documents linked to one another by binary hashes.
-These simple content identifiers, defined in Appendix A, are always expressed as bytestrings of tag 42 (similar in design to [RFC6920] Named Information Hashes).
-All other tags, and many major and minor types, are forbidden to reduce ambiguity, and developers are encouraged to express many kinds of data at higher layers by using the supported types (such as strings or bytestrings).
+The primary goal of this specification is enabling application developers to configure CBOR tooling for this serialization, and for CBOR tooling to support such configuration, in as language-agnostic a way as possible.
+The historical design of this profile was to maximize determinism and simplicity for an internet-scale directed acyclical graph of CBOR documents linked to one another by binary hashes, and for an end-to-end protocol by which this graph grows.
+These simple binary-hash content identifiers, defined in Appendix A, are always expressed as bytestrings of tag 42 (similar in design to [RFC6920] Named Information Hashes).
+All other tags are forbidden to reduce ambiguity, and developers are encouraged to express many kinds of data at higher layers by using the small set of supported types (such as strings or bytestrings); see the Appendix [Application-Level Considerations](#application-level-considerations).
 
 ## Requirements Language
 
@@ -97,11 +102,10 @@ All other tags, and many major and minor types, are forbidden to reduce ambiguit
 - This document uses the conventions defined in CDDL [RFC8610] for expressing the type of CBOR [RFC8949] data items.
 - Examples showing CBOR data, are expressed in "diagnostic notation" as defined in Section 8 of [RFC8949].
 - The term "CBOR object" is equivalent to "CBOR data item" used in [RFC8949].
-- The term "CBOR Core" is in this document abbreviated to "CBOR/c".
 
 # Specification
 
-This section describes how CBOR-42 subsets CBOR and differs from a standard CDE encoding.
+This section describes the CBOR-42 serialization and how it differs from a deterministic encoding defined in the draft BCP on [Determinism].
 
 ## Supported CBOR Objects
 
@@ -110,32 +114,34 @@ This section describes how CBOR-42 subsets CBOR and differs from a standard CDE 
 | int | Integer |
 | float | 64-bit [IEEE754] numbers ONLY |
 | tstr | Text string encoded as UTF-8 [RFC3629] |
-| bstr | Byte string |
+| untagged bstr | Byte string |
+| tag 42 bstr | See Appendix A; no other tags allowed |
 | [] | Array |
 | {} | Map |
-| tag 42 | See Appendix A; no other tags allowed |
 | bool | Boolean true and false (major type 7) |
 | null | Represents a null object (major type 7) |
 
-## Deterministic Encoding Scheme Profile
+## CBOR-42 Serialization
 
-As in CBOR/c, deterministic encoding is mandatory. The encoding scheme adheres to Section 4.2 of [RFC8949], but adds a few constraints (denoted below by RFC+), where this RFC offers choices. The following list contains a summary of the deterministic encoding rules:
+CBOR-42 was designed for determinism (a decade before the generalized CDE deterministic serialization or dCBOR was finalized) and the protocols and applications that it was designed for all mandate its strict encoding.
+The encoding scheme is most similar to the deterministic encoding, but with some major differences.
+The following list contains a summary of these differences:
 
-- RFC+: Floating-point and integer objects MUST be treated as distinct types regardless of their numeric value. This is compliant with Rule 2 in Section 4.2.2 of [RFC8949].
-- RFC: Integers, represented by the int and bigint types, MUST use the int type if the value is between -2^64 and 2^64-1; otherwise, as with timestamp data, they must be encoded at higher layers, whether as bytestrings or strings.
+- Floating-point and integer objects MUST be treated as distinct types regardless of their numeric value. This is compliant with Rule 2 in Section 4.2.2 of [RFC8949].
+- RFC: Integers, represented only by the int type or untagged bytestrings or strings, MUST use the int type if the value is between -2^64 and 2^64-1; otherwise, they can be encoded as bytestrings WITHOUT the bignum tag or as strings, and discrimation from other bytestrings or strings is expected to be handled at the application layer.
   - Appendix B.1 features a list of integer sample values and their expected encoding.
-- RFC+: UNLIKE CBOR/c and standard CDE encoding, floating-point numbers MUST always be encoded using the longest [IEEE754] variant. Appendix B.2 features a list of floating-point sample values and their expected encoding.
-- RFC+: NaN values with payloads (like f97e01), or having the most significant bit set ("signaling"), MUST be rejected. See also Appendix B.4 for invalid NaN variants.
-- RCF+: UNLIKE CBOR/c and standard CDE encoding, map keys MUST be typed as strings; no other types are allowed as map keys.
-- RFC: Map keys MUST be strings and MUST be sorted "length-first", which (because they are strings) can always be achieved by sorting in bytewise lexicographic order. Duplicate keys (i.e. keys with identical deterministic bytestring values) MUST be rejected. Note that semantic equivalence is not tested.
-  - Since map keys must be strings, the following represents a properly sorted map, whether sorted according to the "Canonical CBOR" algorithm (section (3.9) in [RFC7049]) OR the "deterministically encoded" algorithm (section (4.2.3) in [RFC8949]):
+- Unlike the preferred-plus or CDE serializations, floating-point numbers MUST always be encoded using the longest [IEEE754] variant. Appendix B.2 features a list of floating-point sample values and their expected encoding.
+- NaN values with payloads (like f97e01), or having the most significant bit set ("signaling"), MUST be rejected. See also Appendix B.4 for invalid NaN variants.
+- UNLIKE the preferred-plus or CDE serialzations, map keys MUST be typed as strings; no other types are allowed as map keys.
+- Map keys MUST be strings and MUST be sorted "length-first", which (because they are strings) can always be achieved by sorting in bytewise lexicographic order (see [RFC8949] section 4.2.3; deterministic encoding uses the other ordering from section 4.2.1). Duplicate keys (i.e. keys with identical deterministic bytestring values) MUST be rejected. Note that semantic equivalence is not tested when detecting duplicate keys.
+  - Since map keys must be strings, the following represents a properly sorted map, whether sorted according to the "Canonical CBOR" algorithm:
 {
   "a": ... ,
   "b": ... ,
   "aa": ...
 }
-- RFC+: Since CBOR encodings according to this specification maintain uniqueness, there are no specific restrictions or tests needed in order to determine map key equivalence. As an (extreme) example, the floating-point numbers 0.0 and -0.0, and the integer number 0 could all get force-typed as three distinct strings (`0.0`, `-0.0`, and `0`) without colliding.
-- RFC: Indefinite length objects MUST be rejected.
+  - Since CBOR encodings according to this specification maintain uniqueness, there are no specific restrictions or tests needed in order to determine map key equivalence. As an (extreme) example, the floating-point numbers 0.0 and -0.0, and the integer number 0 could all get force-typed as three distinct strings (`0.0`, `-0.0`, and `0`) without colliding.
+- Indefinite length objects of any kind MUST be rejected.
 
 ## CBOR Tool Requirements
 
@@ -146,8 +152,8 @@ To make "raw" signing safe and verification of such signatures practical, CBOR t
 - It MUST be possible to find out the type of a CBOR object, before it is accessed.
 - It MUST be possible to add, delete, and update the contents of CBOR map and array objects, of decoded CBOR data.
 - It MUST be possible to reserialize decoded CBOR data, be it updated or not.
-- Irrespective of whether CBOR data is decoded, updated, or created programmatically, deterministic encoding MUST be maintained.
-- Invalid or unsupported CBOR constructs, as well as CBOR data not adhering to the deterministic encoding scheme MUST be rejected. See also Appendix D and Appendix B.4.
+- Irrespective of whether CBOR data is decoded, updated, or created programmatically, CBOR-42 encoding MUST be maintained, including the less-common sorting of string-keyed maps.
+- Invalid or unsupported CBOR constructs, as well as valid CBOR data not adhering to the CBOR-42 encoding scheme MUST be rejected. See also Appendix D and Appendix B.4.
 
 ### Protocol Primitives
 
@@ -174,7 +180,7 @@ To facilitate cross-platform protocol interoperability, implementers of CBOR-42 
 
 1. Range testing MUST be performed using the traditional ranges for unsigned respectively two-complement numbers. That is, a hypothetical getUint8() MUST reject numbers outside of 0 to 255, whereas a hypothetical getInt8(), MUST reject numbers outside of -128 to 127.
 2. Since a CBOR null typically represents the absence of a value, a decoder MUST provide a test-function, like isNull().
-3. Simple values in CBOR and CBOR/c include the ranges 0-23 and 32-255, all but three of which are invalid in CBOR-42; however, the capability to refer to boolean values (i.e. `true` and `false`) and `null` as major-type 7 simple values MUST be supported to guarantee interoperability with CBOR tooling generally.
+3. Simple values in CBOR include the ranges 0-23 and 32-255, all but three of which are invalid in CBOR-42; however, the capability to refer to boolean values (i.e. `true` and `false`) and `null` as major-type 7 simple values MUST be supported to guarantee interoperability with CBOR tooling generally.
 4. Since CBOR lacks a native-level time object, Section 3.4 of [RFC8949] introduces two variants of time objects using the CBOR tags 0 and 1, neither of which are supported by the CBOR/c-42 data model for historical interoperability reasons. To support time encoding stably, it is RECOMMENDED that EpochTime and/or DateTime types in input be force-typed as strings at the application level or at the ALDR level. Interoperability with other tooling may be difficult to achieve if support for these APIs is desired, and validating dates at higher layers may introduce new security issues at higher layers.
 
 If a call does not match the underlying CBOR type, the call MUST be rejected.
@@ -190,7 +196,7 @@ See [RFC8742] for guidance on streaming best practices.
 
 # Security Considerations
 
-It is assumed that CBOR-42 has no novel security issues compared to CBOR Deterministic Encoding as defined in [RFC8949] but the authors would appreciate any hypotheses or evidence to the contrary.
+It is assumed that CBOR-42 has no novel security issues compared to the deterministic serialization as defined in [RFC8949] and the draft BCP on [Determinism] but the authors would appreciate any hypotheses or evidence to the contrary.
 
 It should be noted that there has been to date little implementer feedback on the ALDR suggestions outlined in the appendices.
 As such, these should be considered as an understudied security surface for the application layer to consider.
@@ -205,7 +211,7 @@ This document requests no IANA actions.
 
 A simple hash-based "content identifier" is used to link documents in the graph for which CBOR-42 was designed, and tag 42 was registered specifically for those link identifiers in the IANA registry, "Concise Binary Object Representation (CBOR) Tags" created by [Section 9.2](https://datatracker.ietf.org/doc/html/rfc8949#section-9.2) of [RFC8949].
 
-Being able to navigate or generate new links in this graph are strictly unrelated concerns and of course optional for a CBOR-42 encoder and decoder, so this entire section is provided informationally for the purposes of making less opaque the bytestrings marked by tag 42.
+Being able to navigate or generate new links in this graph are orthogonal concerns and of course optional for a CBOR-42 encoder and decoder, so this entire section is provided informationally for the purposes of making less opaque the bytestrings marked by tag 42.
 Some CBOR-42 parsers may want to introspect the tag 42 values, if only to know which dereference to other CBOR-42 (or vanilla CBOR) documents.
 
 Note: this describes tag-42 values from the perspective of the CBOR documents in which they are embedded; a simpler, "application developer"-oriented overview of content identifiers can be found at [dasl.ing].
@@ -233,7 +239,7 @@ The most common form of legacy data from deprecated encodings is the historical 
 Prepending `0x00` (padding byte), `0x01` (CID version), `0x70` (DAG-profiled protobuf) turns these into valid "v1" content identifiers, although they still dereference to protobuf objects rather than CBOR objects.
 For guidance on protobuf deserialization, see protobuf.dev or the relevant [protobuf] draft RFC.
 
-Likewise, some specialized applications that can strictly assume segments 1-3 or 1-5 will be invariant systemwide have been observed to use "truncated" content identifiers, prepending the invariant prefixes only in transformations at point of egress for interoperability purposes.
+Likewise, some specialized applications that can strictly assume segments 1 through 3 or 1 through 5 in the list above will be invariant systemwide have been observed to use "truncated" content identifiers, prepending the invariant prefixes only in transformations at point of egress for interoperability purposes.
 This is not best practice but can also serve as some explanation for the padding byte.
 
 # Test Vectors
@@ -315,19 +321,19 @@ The textual representation of the values is based on the serialization method fo
 
 ## Miscellaneous Items
 
-|  Diagnostic Notation | CBOR Encoding | Comment |
+|  Diagnostic Notation | CBOR-42 Encoding | CBOR Encoding | Comment |
 |----|----|----|
-| true | f5 | Boolean true (allowed simple value) |
-| null | f6 | Null (allowed simple value) |
-| simple(59) | f83b | Disallowed simple value |
-| 59 | 183b | unsigned integer |
-| -59 | 383a | signed integer |
-| 0("2025-03-30T12:24:16Z") | c074323032352d30332d33 |  |
-| 305431323a32343a31365a | Disallowed ISO date/time |  |
-| \[1, \[2, 3\], \[4, 5\]\] | 8301820203820405 | Array combinations |
-| { "a": 0, "b": 1, "aa": 2} | a361610161620262616103 | Map object |
-| h'48656c6c6f2043424f5221' | 4b48656c6c6f2043424f5221 | Binary string |
-| "🚀 science" | 6cf09f9a8020736369656e6365 | Text string with emoji |
+| true | f5 | f5 | Boolean true (allowed simple value) |
+| null | f6 | f6 | Null (allowed simple value) |
+| simple(59) | n/a | f83b | Disallowed simple value |
+| 59 | 183b | 183b | unsigned integer |
+| -59 | 383a | 383a | signed integer |
+| 0("2025-03-30T12:24:16Z") | "2025-03-30T12:24:16Z" | c074323032352d30332d33 | application-level tagging assumed |
+| 305431323a32343a31365a | n/a | n/a | Disallowed ISO date/time  |
+| \[1, \[2, 3\], \[4, 5\]\] | 8301820203820405 | 8301820203820405 | Array combinations |
+| { "a": 0, "b": 1, "aa": 2} | a361610161620262616103 | a361610161620262616103 | Map object |
+| h'48656c6c6f2043424f5221' | 4b48656c6c6f2043424f5221 |  4b48656c6c6f2043424f5221 | Binary string |
+| "🚀 science" | 6cf09f9a8020736369656e6365 | 6cf09f9a8020736369656e6365 | Text string with emoji |
 
 ## Invalid Encodings
 
@@ -349,19 +355,23 @@ The textual representation of the values is based on the serialization method fo
 | 5b0010000000000000 |  | Extremely large bstr length indicator: 4503599627370496 |
 
 
-# Configuration and ALDRs
+# Application-level considerations
 
 Someone familiar with the long history of deterministic or canonical CBOR will note that the above specification mixes and matches properties from that history of profiling.
 This creates three major issues for CBOR parsers that are not highly configurable:
 
-1. The drastically reduced set of types and tags, as well as the requirement that map keys be typed as strings, usually require enforcement at the application layer, i.e. as "ALDR"s.
-2. Configuring a generic library to _encode_ CBOR according to this profile's map-sorting requirement, when that library does not support [RFC7049] Canonical-CBOR sort mode (sometimes called "legacy" or "lengthfirst"), can be a substantial burden, and may require implementing that sorting algorithm at the application layer if the parser allows preserving map order in input.
-3. Issues around `float` reduction are harder to triage at the application layer, although many ALDRs and applications that use this encoding (such as that of the Bluesky social network and the data model of its underlying "Authenticated Transfer Protocol") completely sidestep the issue by simply disallowing floats at the CBOR level, or transcoding floats to a "virtual type" at the application layer, e.g. by retyping floats as strings.
+1. The drastically reduced set of types and tags, as well as the requirement that map keys be typed as strings, usually require enforcement mechanisms at the application layer (known in the CBOR WG discussions as "ALDR"s). These are outlined below.
+2. Configuring a generic library to _encode_ CBOR according to this profile's map-sorting requirement, when that library does not support [RFC7049] Canonical-CBOR sort mode (sometimes called "legacy" or "lengthfirst"), can be a substantial burden, and may require implementing that sorting algorithm at the application layer if the encoder can be configured to preserve map order in input.
+3. Issues around `float` reduction are harder to triage at the application layer, although many CBOR-42 applications (such as that of the Bluesky social network and the data model of its underlying "Authenticated Transfer Protocol") completely sidestep the issue by simply disallowing floats at the application level to avoid having to handle them at the CBOR level. Some applications seeking interoperability with these float-free applications transcode floats to a "virtual type" at the application layer, e.g. by retyping floats as strings.
 
-# Decoding Strictness
+## Bignums and Bytestrings
 
-When decoding CBOR data encoded without observing the rules defined above, it recommended that validity rules around allowed types and tags, integer reduction, float reduction, and map sorting follow the looser norms set out in [RFC8949].
-A CBOR-42 application or encoder has no obligation to support re-encoding of such non-profile data according to these looser rules, however, and roundtrip-translation is unlikely to be guaranteed as this was a non-goal of the original design.
+Unlike in serializations that use major type 2 ("BIGNUMS"), integers larger than the integer basic type are not tagged as such when being encoded as bytestrings.
+To avoid confusing large integers and other uses of the `bytes` major type, applications generally use some form of application-level metadata or schema system rather than the CBOR tag: in the case of older forms of IPFS like the UnixFS file system, there is an IPLD schema validation step between the application layer and the CBOR encoding; in the case of BlueSky and the AT Protocol, the equivalent schematization happens at the layer of "lexicons".
+
+## Datetimes
+
+Similarly, CBOR-42 does not use the tag for either CBOR datetime format.
 
 # Acknowledgments
 {:numbered="false"}
