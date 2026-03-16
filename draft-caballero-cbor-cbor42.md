@@ -4,7 +4,7 @@ abbrev: "CBOR42"
 category: info
 
 docname: draft-caballero-cbor-cbor42-latest
-submissiontype: IETF  # also: "independent", "editorial", "IAB", or "IRTF"
+submissiontype: IRTF  # also: "independent", "editorial", "IAB", or "IRTF"
 number:
 date:
 consensus: true
