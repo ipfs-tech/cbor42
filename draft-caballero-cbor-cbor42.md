@@ -140,7 +140,6 @@ The following list contains a summary of these differences:
   "b": ... ,
   "aa": ...
 }
-  - Since CBOR encodings according to this specification maintain uniqueness, there are no specific restrictions or tests needed in order to determine map key equivalence. As an (extreme) example, the floating-point numbers 0.0 and -0.0, and the integer number 0 could all get force-typed as three distinct strings (`0.0`, `-0.0`, and `0`) without colliding.
 - Indefinite length objects of any kind MUST be rejected.
 
 ## CBOR Tool Requirements
