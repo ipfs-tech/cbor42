@@ -130,8 +130,10 @@ The following list contains a summary of these differences:
 - Floating-point and integer objects MUST be treated as distinct types regardless of their numeric value. This is compliant with Rule 2 in Section 4.2.2 of [RFC8949].
 - RFC: Integers, represented only by the int type or untagged bytestrings or strings, MUST use the int type if the value is between -2^64 and 2^64-1; otherwise, they can be encoded as bytestrings WITHOUT the bignum tag or as strings, and discrimation from other bytestrings or strings is expected to be handled at the application layer.
   - Appendix B.1 features a list of integer sample values and their expected encoding.
-- Unlike the preferred-plus or CDE serializations, floating-point numbers MUST always be encoded using the longest [IEEE754] variant. Appendix B.2 features a list of floating-point sample values and their expected encoding.
-- NaN values with payloads (like f97e01), or having the most significant bit set ("signaling"), MUST be rejected. See also Appendix B.4 for invalid NaN variants.
+- Unlike the preferred-plus or CDE serializations, floating-point numbers MUST always be encoded using the 64-bit [IEEE754] variant. Appendix B.2 features a list of floating-point sample values and their expected encoding. Appending B.4 lists invalid encodings.
+  - NaN values with payloads (like f97e01), or having the most significant bit set ("signaling"), MUST be rejected.
+  - Infinity values like fb7ff0000000000000 or fbfff0000000000000 MUST be rejected.
+  - -0.0 (fb8000000000000000) MUST be rejected. It's equal to 0.0 (fb0000000000000000) which can be used instead.
 - UNLIKE the preferred-plus or CDE serialzations, map keys MUST be typed as strings; no other types are allowed as map keys.
 - Map keys MUST be strings and MUST be sorted "length-first", which (because they are strings) can always be achieved by sorting in bytewise lexicographic order (see [RFC8949] section 4.2.3; deterministic encoding uses the other ordering from section 4.2.1). Duplicate keys (i.e. keys with identical deterministic bytestring values) MUST be rejected. Note that semantic equivalence is not tested when detecting duplicate keys.
   - Since map keys must be strings, the following represents a properly sorted map, whether sorted according to the "Canonical CBOR" algorithm:
@@ -140,7 +142,6 @@ The following list contains a summary of these differences:
   "b": ... ,
   "aa": ...
 }
-  - Since CBOR encodings according to this specification maintain uniqueness, there are no specific restrictions or tests needed in order to determine map key equivalence. As an (extreme) example, the floating-point numbers 0.0 and -0.0, and the integer number 0 could all get force-typed as three distinct strings (`0.0`, `-0.0`, and `0`) without colliding.
 - Indefinite length objects of any kind MUST be rejected.
 
 ## CBOR Tool Requirements
@@ -276,7 +277,7 @@ The textual representation of the values is based on the serialization method fo
 | Diagnostic Notation | CBOR-42 Encoding | CBOR Encoding | Comment |
 |----|----|----|----|
 | 0.0 | fb0000000000000000 | fb0000000000000000 | Zero |
-| -0.0 | fb8000000000000000 | fb8000000000000000 | Negative zero |
+| -0.0 | invalid | fb8000000000000000 | Negative zero |
 | Infinity | invalid | f97c00 | Infinity |
 | -Infinity | invalid | f9fc00 | Negative infinity |
 | NaN | invalid | f97e00 | Not a number |
@@ -349,6 +350,9 @@ The textual representation of the values is based on the serialization method fo
 | fa7fc00000 | NaN | NaNs not allowed |
 | f97e01 | NaN | NaNs not allowed |
 | f97e00 | NaN | NaNs not allowed |
+| fb7ff0000000000000 | Infinity | Infinity not allowed |
+| fbfff0000000000000 | -Infinity | Infinity not allowed |
+| fb8000000000000000 | -0.0 | Negative zero not allowed |
 | 5f4101420203ff | (\_ h'01', h'0203') | Indefinite length object |
 | fc |  | Reserved |
 | f818 |  | Invalid simple value |
